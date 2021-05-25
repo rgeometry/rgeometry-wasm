@@ -114,7 +114,7 @@ pub mod playground {
     todo!()
   }
 
-  pub fn render_polygon(poly: Polygon<BigRational>) {
+  pub fn render_polygon(poly: &Polygon<BigRational>) {
     todo!()
   }
 
