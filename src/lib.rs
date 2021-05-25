@@ -1,3 +1,11 @@
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+  #[wasm_bindgen(js_namespace = console)]
+  fn log(s: &str);
+}
+
 mod timer {
   pub struct Timer {
     started: Option<f64>,
@@ -53,6 +61,8 @@ pub mod playground {
   use rgeometry::data::*;
 
   use gloo_events::EventListener;
+  use num::*;
+  use std::fmt;
   use wasm_bindgen::prelude::*;
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
   use web_sys;
@@ -71,6 +81,24 @@ pub mod playground {
     canvas
   }
 
+  pub fn get_context_2d(canvas: &web_sys::HtmlCanvasElement) -> web_sys::CanvasRenderingContext2d {
+    canvas
+      .get_context("2d")
+      .unwrap()
+      .unwrap()
+      .dyn_into::<web_sys::CanvasRenderingContext2d>()
+      .unwrap()
+  }
+
+  pub fn clear_screen() {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+    context.save();
+    context.reset_transform().unwrap();
+    context.clear_rect(0., 0., canvas.width() as f64, canvas.height() as f64);
+    context.restore();
+  }
+
   pub fn absolute_mouse_position() -> (i32, i32) {
     super::MOUSE.with(|mouse| mouse.position.get())
   }
@@ -82,40 +110,49 @@ pub mod playground {
     todo!()
   }
 
-  ///
-  pub fn set_viewport_height(height: f64) {
+  pub fn set_viewport(width: f64, height: f64) {
     let canvas = get_canvas();
-    let context = canvas
-      .get_context("2d")
-      .unwrap()
-      .unwrap()
-      .dyn_into::<web_sys::CanvasRenderingContext2d>()
-      .unwrap();
+    let context = get_context_2d(&canvas);
+
     context.reset_transform().unwrap();
 
-    // 20x10
-    // height=1
-    // ratio = 10 / 1 = 10
-    // 2x1
-    // scale( 20/ratio/2, -height/2)
-    let ratio = canvas.height() as f64 / height;
+    let aspect = width / height;
+    let ratio_width = canvas.width() as f64 / width;
+    let ratio_height = canvas.height() as f64 / height;
+    let ratio = if ratio_width < ratio_height {
+      ratio_width
+    } else {
+      ratio_height
+    };
     context.scale(ratio, -ratio).unwrap();
     context
-      .translate(canvas.width() as f64 / ratio * ratio / 2., -height / 2.)
+      .translate(
+        canvas.width() as f64 / ratio / 2.,
+        -(canvas.height() as f64 / ratio / 2.),
+      )
       .unwrap();
-    todo!()
-  }
-
-  pub fn set_viewport_width(width: f64) {
-    todo!()
-  }
-
-  pub fn set_viewport(width: f64, height: f64) {
-    todo!()
+    context.set_line_width(5. / ratio);
   }
 
   pub fn render_polygon(poly: &Polygon<BigRational>) {
-    todo!()
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+
+    context.begin_path();
+    context.set_line_join("round");
+    let mut iter = poly
+      .iter()
+      .map(|(pt, _meta)| pt.cast(|v| BigRational::to_f64(&v).unwrap()));
+    if let Some(origin) = iter.next() {
+      let [x, y] = origin.array;
+      context.move_to(x, y);
+      while let Some(pt) = iter.next() {
+        let [x2, y2] = pt.array;
+        context.line_to(x2, y2);
+      }
+    }
+    context.close_path();
+    context.stroke();
   }
 
   pub fn with_points() -> Vec<Point<BigRational, 2>> {
