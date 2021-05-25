@@ -18,6 +18,9 @@ version  = "0.3.4"
 features = [
   'CanvasRenderingContext2d',
   'Document',
+  'DomMatrix',
+  'DomPointInit',
+  'DomPoint',
   'Element',
   'HtmlCanvasElement',
   'HtmlInputElement',

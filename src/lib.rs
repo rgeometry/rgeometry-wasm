@@ -104,10 +104,20 @@ pub mod playground {
   }
 
   pub fn mouse_position() -> (f64, f64) {
-    // get canvas transformation matrix.
-    // inverse the matrix.
-    // transform the mouse position.
-    todo!()
+    let (x, y) = absolute_mouse_position();
+    inv_canvas_position(x, y)
+  }
+
+  pub fn inv_canvas_position(x: i32, y: i32) -> (f64, f64) {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+    let transform = &context.get_transform().unwrap();
+    let inv = transform.inverse();
+    let mut pt = web_sys::DomPointInit::new();
+    pt.x(x as f64);
+    pt.y(y as f64);
+    let out = inv.transform_point_with_point(&pt);
+    (out.x(), out.y())
   }
 
   pub fn set_viewport(width: f64, height: f64) {
@@ -165,6 +175,18 @@ pub mod playground {
   {
     let canvas = super::playground::get_canvas();
     let listener = EventListener::new(&canvas, "click", move |_event| callback());
+    listener.forget();
+  }
+
+  pub fn on_mousemove<F>(callback: F)
+  where
+    F: Fn(&web_sys::MouseEvent) + 'static,
+  {
+    let canvas = super::playground::get_canvas();
+    let listener = EventListener::new(&canvas, "mousemove", move |event| {
+      let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
+      callback(event)
+    });
     listener.forget();
   }
   /*
