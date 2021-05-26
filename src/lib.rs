@@ -6,28 +6,24 @@ extern "C" {
   fn log(s: &str);
 }
 
-mod timer {
-  pub struct Timer {
-    started: Option<f64>,
-    paused: Option<f64>,
-  }
-  // pause(f64)
-  // resume(f64)
-  // reset(f64)
-  // read() -> f64
-  // update(f64)
-}
+// mod timer {
+//   pub struct Timer {
+//     started: Option<f64>,
+//     paused: Option<f64>,
+//   }
+//   // pause(f64)
+//   // resume(f64)
+//   // reset(f64)
+//   // read() -> f64
+//   // update(f64)
+// }
 
 mod mouse {
-  // use std::borrow::*;
-  use std::cell::{Cell, RefCell};
-  use std::ops::Deref;
+  use std::cell::Cell;
   use std::rc::Rc;
-  // use std::sync::Once;
 
   use gloo_events::EventListener;
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
-  use web_sys;
 
   pub struct MousePosition {
     // _once: Once,
@@ -54,19 +50,12 @@ thread_local! {
 }
 
 pub mod playground {
-  use super::timer::*;
-
-  use gloo_render::*;
   use num::BigRational;
   use rgeometry::data::*;
 
   use gloo_events::EventListener;
   use num::*;
-  use std::fmt;
-  use wasm_bindgen::prelude::*;
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
-  use web_sys;
-  use web_sys::EventTarget;
 
   pub fn get_document() -> web_sys::Document {
     web_sys::window().unwrap().document().unwrap()
@@ -126,7 +115,6 @@ pub mod playground {
 
     context.reset_transform().unwrap();
 
-    let aspect = width / height;
     let ratio_width = canvas.width() as f64 / width;
     let ratio_height = canvas.height() as f64 / height;
     let ratio = if ratio_width < ratio_height {
@@ -156,7 +144,7 @@ pub mod playground {
     if let Some(origin) = iter.next() {
       let [x, y] = origin.array;
       context.move_to(x, y);
-      while let Some(pt) = iter.next() {
+      for pt in iter {
         let [x2, y2] = pt.array;
         context.line_to(x2, y2);
       }
