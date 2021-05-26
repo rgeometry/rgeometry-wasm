@@ -186,18 +186,6 @@
 <span id="183">183</span>
 <span id="184">184</span>
 <span id="185">185</span>
-<span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
@@ -207,28 +195,24 @@
   <span class="kw">fn</span> <span class="ident">log</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>);
 }
 
-<span class="kw">mod</span> <span class="ident">timer</span> {
-  <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Timer</span> {
-    <span class="ident">started</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>,
-    <span class="ident">paused</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>,
-  }
-  <span class="comment">// pause(f64)</span>
-  <span class="comment">// resume(f64)</span>
-  <span class="comment">// reset(f64)</span>
-  <span class="comment">// read() -&gt; f64</span>
-  <span class="comment">// update(f64)</span>
-}
+<span class="comment">// mod timer {</span>
+<span class="comment">//   pub struct Timer {</span>
+<span class="comment">//     started: Option&lt;f64&gt;,</span>
+<span class="comment">//     paused: Option&lt;f64&gt;,</span>
+<span class="comment">//   }</span>
+<span class="comment">//   // pause(f64)</span>
+<span class="comment">//   // resume(f64)</span>
+<span class="comment">//   // reset(f64)</span>
+<span class="comment">//   // read() -&gt; f64</span>
+<span class="comment">//   // update(f64)</span>
+<span class="comment">// }</span>
 
 <span class="kw">mod</span> <span class="ident">mouse</span> {
-  <span class="comment">// use std::borrow::*;</span>
-  <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::{<span class="ident">Cell</span>, <span class="ident">RefCell</span>};
-  <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">Deref</span>;
+  <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>;
   <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">rc</span>::<span class="ident">Rc</span>;
-  <span class="comment">// use std::sync::Once;</span>
 
   <span class="kw">use</span> <span class="ident">gloo_events</span>::<span class="ident">EventListener</span>;
   <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::{<span class="ident">JsCast</span>, <span class="ident">UnwrapThrowExt</span>};
-  <span class="kw">use</span> <span class="ident">web_sys</span>;
 
   <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MousePosition</span> {
     <span class="comment">// _once: Once,</span>
@@ -255,19 +239,12 @@
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">playground</span> {
-  <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">timer</span>::<span class="kw-2">*</span>;
-
-  <span class="kw">use</span> <span class="ident">gloo_render</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">num</span>::<span class="ident">BigRational</span>;
   <span class="kw">use</span> <span class="ident">rgeometry</span>::<span class="ident">data</span>::<span class="kw-2">*</span>;
 
   <span class="kw">use</span> <span class="ident">gloo_events</span>::<span class="ident">EventListener</span>;
   <span class="kw">use</span> <span class="ident">num</span>::<span class="kw-2">*</span>;
-  <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
-  <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::{<span class="ident">JsCast</span>, <span class="ident">UnwrapThrowExt</span>};
-  <span class="kw">use</span> <span class="ident">web_sys</span>;
-  <span class="kw">use</span> <span class="ident">web_sys</span>::<span class="ident">EventTarget</span>;
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_document</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">web_sys</span>::<span class="ident">Document</span> {
     <span class="ident">web_sys</span>::<span class="ident">window</span>().<span class="ident">unwrap</span>().<span class="ident">document</span>().<span class="ident">unwrap</span>()
@@ -327,7 +304,6 @@
 
     <span class="ident">context</span>.<span class="ident">reset_transform</span>().<span class="ident">unwrap</span>();
 
-    <span class="kw">let</span> <span class="ident">aspect</span> <span class="op">=</span> <span class="ident">width</span> <span class="op">/</span> <span class="ident">height</span>;
     <span class="kw">let</span> <span class="ident">ratio_width</span> <span class="op">=</span> <span class="ident">canvas</span>.<span class="ident">width</span>() <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">width</span>;
     <span class="kw">let</span> <span class="ident">ratio_height</span> <span class="op">=</span> <span class="ident">canvas</span>.<span class="ident">height</span>() <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">height</span>;
     <span class="kw">let</span> <span class="ident">ratio</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ratio_width</span> <span class="op">&lt;</span> <span class="ident">ratio_height</span> {
@@ -357,7 +333,7 @@
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">origin</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>() {
       <span class="kw">let</span> [<span class="ident">x</span>, <span class="ident">y</span>] <span class="op">=</span> <span class="ident">origin</span>.<span class="ident">array</span>;
       <span class="ident">context</span>.<span class="ident">move_to</span>(<span class="ident">x</span>, <span class="ident">y</span>);
-      <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pt</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>() {
+      <span class="kw">for</span> <span class="ident">pt</span> <span class="kw">in</span> <span class="ident">iter</span> {
         <span class="kw">let</span> [<span class="ident">x2</span>, <span class="ident">y2</span>] <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">array</span>;
         <span class="ident">context</span>.<span class="ident">line_to</span>(<span class="ident">x2</span>, <span class="ident">y2</span>);
       }
