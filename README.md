@@ -1,12 +1,3 @@
-playground::set_viewport_height
-playground::set_viewport_width
+API Documentation: https://rgeometry.org/rgeometry-wasm/rgeometry_wasm/index.html
 
-playground::render_polygon
-
-playground::with_points() -> Vec<Point<BigRational, 2>>
-
-playground::on_click(|| ... )
-
-polygon.scale_to_fit(width, height)
-polygon.scale_to_fit_height(height)
-polygon.scale_to_fit_width(width)
+Playground: https://rgeometry.org/rgeometry-playground/
