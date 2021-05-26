@@ -11,15 +11,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: Swatinem/rust-cache@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - uses: Swatinem/rust-cache@v1
 
     - uses: actions-rs/cargo@v1
-        with:
-          command: doc
+      with:
+        command: doc
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1
