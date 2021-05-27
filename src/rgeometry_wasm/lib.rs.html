@@ -327,8 +327,6 @@
 <span id="324">324</span>
 <span id="325">325</span>
 <span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
@@ -562,8 +560,7 @@
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">offset_x</span>();
         <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">offset_y</span>();
         <span class="ident">POINTS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">pts</span><span class="op">|</span> {
-          <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
-          <span class="kw">for</span> <span class="ident">pt</span> <span class="kw">in</span> <span class="ident">pts</span>.<span class="ident">borrow</span>().<span class="ident">deref</span>() {
+          <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">pt</span>) <span class="kw">in</span> <span class="ident">pts</span>.<span class="ident">borrow</span>().<span class="ident">deref</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
             <span class="comment">// let pt: &amp;Point&lt;BigRational, 2&gt; = &amp;pt;</span>
             <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">into</span>();
 
@@ -584,7 +581,6 @@
               <span class="ident">SELECTED</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">selected</span><span class="op">|</span> <span class="ident">selected</span>.<span class="ident">set</span>(<span class="prelude-ty">Option</span>::<span class="prelude-val">Some</span>((<span class="ident">i</span>, <span class="ident">x</span>, <span class="ident">y</span>))));
               <span class="kw">break</span>;
             }
-            <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
           }
         })
       });
