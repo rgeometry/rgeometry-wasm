@@ -230,8 +230,7 @@ pub mod playground {
         let x = event.offset_x();
         let y = event.offset_y();
         POINTS.with(|pts| {
-          let mut i = 0;
-          for pt in pts.borrow().deref() {
+          for (i, pt) in pts.borrow().deref().iter().enumerate() {
             // let pt: &Point<BigRational, 2> = &pt;
             let pt: Point<f64, 2> = pt.into();
 
@@ -252,7 +251,6 @@ pub mod playground {
               SELECTED.with(|selected| selected.set(Option::Some((i, x, y))));
               break;
             }
-            i += 1;
           }
         })
       });
