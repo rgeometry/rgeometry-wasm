@@ -55,7 +55,18 @@ pub mod playground {
 
   use gloo_events::EventListener;
   use num::*;
+  use rand::distributions::Standard;
+  // use rand::distributions::Uniform;
+  use rand::Rng;
+  use std::cell::{Cell, RefCell};
+  use std::convert::*;
+  use std::ops::Deref;
+  // use std::ops::DerefMut;
+  use std::ops::Index;
+  use std::sync::Once;
+  use wasm_bindgen::prelude::*;
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
+  use web_sys::Path2d;
 
   pub fn get_document() -> web_sys::Document {
     web_sys::window().unwrap().document().unwrap()
@@ -109,6 +120,16 @@ pub mod playground {
     (out.x(), out.y())
   }
 
+  pub fn get_viewport() -> (f64, f64) {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+    let transform = context.get_transform().unwrap();
+    let scale = transform.a();
+    (
+      canvas.width() as f64 / scale,
+      canvas.height() as f64 / scale,
+    )
+  }
   pub fn set_viewport(width: f64, height: f64) {
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
@@ -129,7 +150,7 @@ pub mod playground {
         -(canvas.height() as f64 / ratio / 2.),
       )
       .unwrap();
-    context.set_line_width(5. / ratio);
+    context.set_line_width(2. / ratio);
   }
 
   pub fn render_polygon(poly: &Polygon<BigRational>) {
@@ -153,8 +174,108 @@ pub mod playground {
     context.stroke();
   }
 
-  pub fn with_points() -> Vec<Point<BigRational, 2>> {
-    todo!()
+  pub fn render_point(pt: &Point<BigRational, 2>) {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+
+    let pt: Point<f64, 2> = pt.into();
+
+    let path = Path2d::new().unwrap();
+    path
+      .arc(
+        *pt.x_coord(),
+        *pt.y_coord(),
+        0.05,
+        0.0,
+        std::f64::consts::PI * 2.,
+      )
+      .unwrap();
+
+    context.set_fill_style(&JsValue::from_str("green"));
+    context.fill_with_path_2d(&path);
+    context.stroke_with_path(&path);
+  }
+
+  pub fn with_points(n: usize) -> Vec<Point<BigRational, 2>> {
+    with_points_from(n, vec![])
+  }
+  pub fn with_points_from(
+    n: usize,
+    mut original_pts: Vec<Point<BigRational, 2>>,
+  ) -> Vec<Point<BigRational, 2>> {
+    thread_local! {
+      static POINTS: RefCell<Vec<Point<BigRational,2>>> = RefCell::new(vec![]);
+      static SELECTED: Cell<Option<(usize,i32,i32)>> = Cell::new(Option::None);
+    }
+    static START: Once = Once::new();
+
+    START.call_once(|| {
+      crate::log("Installing handlers.");
+      POINTS.with(|pts| {
+        let mut rng = rand::thread_rng();
+        let mut mut_ptrs = pts.borrow_mut();
+        mut_ptrs.append(&mut original_pts);
+        let (width, height) = get_viewport();
+        let t = Transform::scale(Vector([width * 0.8, height * 0.8]))
+          * Transform::translate(Vector([-0.5, -0.5]));
+        while mut_ptrs.len() < n {
+          let pt: Point<f64, 2> = rng.sample(Standard);
+          let pt = &t * pt;
+          mut_ptrs.push(pt.try_into().unwrap())
+        }
+      });
+      on_mousedown(|event| {
+        let canvas = get_canvas();
+        let context = get_context_2d(&canvas);
+        let x = event.offset_x();
+        let y = event.offset_y();
+        POINTS.with(|pts| {
+          let mut i = 0;
+          for pt in pts.borrow().deref() {
+            // let pt: &Point<BigRational, 2> = &pt;
+            let pt: Point<f64, 2> = pt.into();
+
+            let path = Path2d::new().unwrap();
+            path
+              .arc(
+                *pt.x_coord(),
+                *pt.y_coord(),
+                0.05,
+                0.0,
+                std::f64::consts::PI * 2.,
+              )
+              .unwrap();
+            let in_path = context.is_point_in_path_with_path_2d_and_f64(&path, x as f64, y as f64);
+            let in_stroke =
+              context.is_point_in_stroke_with_path_and_x_and_y(&path, x as f64, y as f64);
+            if in_path || in_stroke {
+              SELECTED.with(|selected| selected.set(Option::Some((i, x, y))));
+              break;
+            }
+            i += 1;
+          }
+        })
+      });
+      on_mouseup(|_event| SELECTED.with(|selected| selected.set(None)));
+      on_mousemove(move |event| {
+        SELECTED.with(|selected| {
+          if let Option::Some((i, x, y)) = selected.get() {
+            let (x, y) = inv_canvas_position(x, y);
+            let (ox, oy) = inv_canvas_position(event.offset_x(), event.offset_y());
+            let dx = (ox - x) as f64;
+            let dy = (oy - y) as f64;
+            selected.set(Some((i, event.offset_x(), event.offset_y())));
+            POINTS.with(|pts| {
+              let mut vec = pts.borrow_mut();
+              let pt = vec.index(i);
+              let vector: Vector<BigRational, 2> = Vector([dx, dy]).try_into().unwrap();
+              vec[i] = pt + &vector;
+            });
+          }
+        });
+      })
+    });
+    POINTS.with(|pts| pts.borrow().clone())
   }
 
   pub fn on_canvas_click<F>(callback: F)
@@ -172,6 +293,28 @@ pub mod playground {
   {
     let canvas = super::playground::get_canvas();
     let listener = EventListener::new(&canvas, "mousemove", move |event| {
+      let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
+      callback(event)
+    });
+    listener.forget();
+  }
+  pub fn on_mousedown<F>(callback: F)
+  where
+    F: Fn(&web_sys::MouseEvent) + 'static,
+  {
+    let canvas = super::playground::get_canvas();
+    let listener = EventListener::new(&canvas, "mousedown", move |event| {
+      let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
+      callback(event)
+    });
+    listener.forget();
+  }
+  pub fn on_mouseup<F>(callback: F)
+  where
+    F: Fn(&web_sys::MouseEvent) + 'static,
+  {
+    let canvas = super::playground::get_canvas();
+    let listener = EventListener::new(&canvas, "mouseup", move |event| {
       let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
       callback(event)
     });
