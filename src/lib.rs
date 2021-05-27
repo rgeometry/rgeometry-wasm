@@ -185,7 +185,7 @@ pub mod playground {
       .arc(
         *pt.x_coord(),
         *pt.y_coord(),
-        0.05,
+        0.1,
         0.0,
         std::f64::consts::PI * 2.,
       )
