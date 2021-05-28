@@ -26,7 +26,6 @@ mod mouse {
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
   pub struct MousePosition {
-    // _once: Once,
     pub position: Rc<Cell<(i32, i32)>>,
   }
 
@@ -174,6 +173,27 @@ pub mod playground {
     context.stroke();
   }
 
+  pub fn render_line(pts: &[Point<BigRational, 2>]) {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+
+    context.begin_path();
+    context.set_line_join("round");
+    let mut iter = pts.iter().map(|pt| {
+      let pt: Point<f64, 2> = pt.try_into().unwrap();
+      pt
+    });
+    if let Some(origin) = iter.next() {
+      let [x, y] = origin.array;
+      context.move_to(x, y);
+      for pt in iter {
+        let [x2, y2] = pt.array;
+        context.line_to(x2, y2);
+      }
+    }
+    context.stroke();
+  }
+
   pub fn render_point(pt: &Point<BigRational, 2>) {
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
@@ -239,7 +259,7 @@ pub mod playground {
               .arc(
                 *pt.x_coord(),
                 *pt.y_coord(),
-                0.05,
+                0.1,
                 0.0,
                 std::f64::consts::PI * 2.,
               )
