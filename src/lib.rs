@@ -117,8 +117,8 @@ pub mod playground {
     let transform = &context.get_transform().unwrap();
     let inv = transform.inverse();
     let mut pt = web_sys::DomPointInit::new();
-    pt.x(x as f64 / ratio);
-    pt.y(y as f64 / ratio);
+    pt.x(x as f64 * ratio);
+    pt.y(y as f64 * ratio);
     let out = inv.transform_point_with_point(&pt);
     (out.x(), out.y())
   }
