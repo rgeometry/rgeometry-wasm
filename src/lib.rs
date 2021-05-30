@@ -67,6 +67,9 @@ pub mod playground {
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
   use web_sys::Path2d;
 
+  pub fn get_device_pixel_ratio() -> f64 {
+    web_sys::window().unwrap().device_pixel_ratio()
+  }
   pub fn get_document() -> web_sys::Document {
     web_sys::window().unwrap().document().unwrap()
   }
@@ -108,13 +111,14 @@ pub mod playground {
   }
 
   pub fn inv_canvas_position(x: i32, y: i32) -> (f64, f64) {
+    let ratio = get_device_pixel_ratio();
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
     let transform = &context.get_transform().unwrap();
     let inv = transform.inverse();
     let mut pt = web_sys::DomPointInit::new();
-    pt.x(x as f64);
-    pt.y(y as f64);
+    pt.x(x as f64 / ratio);
+    pt.y(y as f64 / ratio);
     let out = inv.transform_point_with_point(&pt);
     (out.x(), out.y())
   }
@@ -124,12 +128,14 @@ pub mod playground {
     let context = get_context_2d(&canvas);
     let transform = context.get_transform().unwrap();
     let scale = transform.a();
+    // let ratio = get_device_pixel_ratio();
     (
       canvas.width() as f64 / scale,
       canvas.height() as f64 / scale,
     )
   }
   pub fn set_viewport(width: f64, height: f64) {
+    // let ratio = get_device_pixel_ratio();
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
 
