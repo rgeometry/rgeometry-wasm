@@ -127,7 +127,6 @@ pub mod playground {
   pub fn from_pixels(pixels: u32) -> f64 {
     let (vw, vh) = get_viewport();
     let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
     let ratio = get_device_pixel_ratio();
     if vw < vh {
       (vw / canvas.width() as f64) * pixels as f64 * ratio
