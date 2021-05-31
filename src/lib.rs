@@ -30,6 +30,7 @@ mod mouse {
   }
 
   impl MousePosition {
+    // FIXME: Allow other calls to update the cursor position.
     pub fn new() -> MousePosition {
       let position = Rc::new(Cell::new((0, 0)));
       let position_ref = position.clone();
@@ -123,6 +124,17 @@ pub mod playground {
     (out.x(), out.y())
   }
 
+  pub fn from_pixels(pixels: u32) -> f64 {
+    let (vw, vh) = get_viewport();
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+    let ratio = get_device_pixel_ratio();
+    if vw < vh {
+      (vw / canvas.width() as f64) * pixels as f64 * ratio
+    } else {
+      (vh / canvas.height() as f64) * pixels as f64 * ratio
+    }
+  }
   pub fn get_viewport() -> (f64, f64) {
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
@@ -135,7 +147,7 @@ pub mod playground {
     )
   }
   pub fn set_viewport(width: f64, height: f64) {
-    // let ratio = get_device_pixel_ratio();
+    let pixel_ratio = get_device_pixel_ratio();
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
 
@@ -155,7 +167,7 @@ pub mod playground {
         -(canvas.height() as f64 / ratio / 2.),
       )
       .unwrap();
-    context.set_line_width(2. / ratio);
+    context.set_line_width(2. / ratio * pixel_ratio);
   }
 
   pub fn render_polygon(poly: &Polygon<BigRational>) {
@@ -200,10 +212,7 @@ pub mod playground {
     context.stroke();
   }
 
-  pub fn render_point(pt: &Point<BigRational, 2>) {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
-
+  pub fn point_path_2d(pt: &Point<BigRational, 2>) -> Path2d {
     let pt: Point<f64, 2> = pt.into();
 
     let path = Path2d::new().unwrap();
@@ -211,11 +220,19 @@ pub mod playground {
       .arc(
         *pt.x_coord(),
         *pt.y_coord(),
-        0.1,
+        from_pixels(15), // radius
         0.0,
         std::f64::consts::PI * 2.,
       )
       .unwrap();
+    path
+  }
+
+  pub fn render_point(pt: &Point<BigRational, 2>) {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+
+    let path = point_path_2d(pt);
 
     context.set_fill_style(&JsValue::from_str("green"));
     context.fill_with_path_2d(&path);
@@ -250,7 +267,8 @@ pub mod playground {
           mut_ptrs.push(pt.try_into().unwrap())
         }
       });
-      on_mousedown(|event| {
+      let ratio = get_device_pixel_ratio();
+      on_mousedown(move |event| {
         let canvas = get_canvas();
         let context = get_context_2d(&canvas);
         let x = event.offset_x();
@@ -258,21 +276,17 @@ pub mod playground {
         POINTS.with(|pts| {
           for (i, pt) in pts.borrow().deref().iter().enumerate() {
             // let pt: &Point<BigRational, 2> = &pt;
-            let pt: Point<f64, 2> = pt.into();
-
-            let path = Path2d::new().unwrap();
-            path
-              .arc(
-                *pt.x_coord(),
-                *pt.y_coord(),
-                0.1,
-                0.0,
-                std::f64::consts::PI * 2.,
-              )
-              .unwrap();
-            let in_path = context.is_point_in_path_with_path_2d_and_f64(&path, x as f64, y as f64);
-            let in_stroke =
-              context.is_point_in_stroke_with_path_and_x_and_y(&path, x as f64, y as f64);
+            let path = point_path_2d(pt);
+            let in_path = context.is_point_in_path_with_path_2d_and_f64(
+              &path,
+              x as f64 * ratio,
+              y as f64 * ratio,
+            );
+            let in_stroke = context.is_point_in_stroke_with_path_and_x_and_y(
+              &path,
+              x as f64 * ratio,
+              y as f64 * ratio,
+            );
             if in_path || in_stroke {
               SELECTED.with(|selected| selected.set(Option::Some((i, x, y))));
               break;
