@@ -176,8 +176,8 @@ pub mod playground {
     context.begin_path();
     context.set_line_join("round");
     let mut iter = poly
-      .iter()
-      .map(|pt| pt.cast(|v| BigRational::to_f64(&v).unwrap()));
+      .iter_boundary()
+      .map(|pt| pt.point().cast(|v| BigRational::to_f64(&v).unwrap()));
     if let Some(origin) = iter.next() {
       let [x, y] = origin.array;
       context.move_to(x, y);
