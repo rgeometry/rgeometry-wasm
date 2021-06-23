@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/rgeometry-26a631e95254b331/10a16d3/src/data/intersection_set.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>intersection_set.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/rgeometry-26a631e95254b331/01ea084/src/data/intersection_set.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>intersection_set.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../rgeometry/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -229,9 +229,39 @@
 <span id="226">226</span>
 <span id="227">227</span>
 <span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::IndexEdge</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::VertexId</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::PointId</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils::SparseIndex</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils::SparseVec</span>;
 
@@ -239,11 +269,20 @@
 <span class="kw">use</span> <span class="ident">rand::Rng</span>;
 <span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">Index</span>, <span class="ident">IndexMut</span>};
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IndexIntersection</span> {
   <span class="kw">pub</span> <span class="ident">min</span>: <span class="ident">IndexEdge</span>,
   <span class="kw">pub</span> <span class="ident">max</span>: <span class="ident">IndexEdge</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">std::fmt::Debug</span> <span class="kw">for</span> <span class="ident">IndexIntersection</span> {
+  <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
+    <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;IndexIntersection&quot;</span>)
+      .<span class="ident">field</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">min</span>)
+      .<span class="ident">field</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">max</span>)
+      .<span class="ident">finish</span>()
+  }
 }
 
 <span class="kw">impl</span> <span class="ident">IndexIntersection</span> {
@@ -344,14 +383,16 @@
   <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">IndexEdge</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SparseIndex</span><span class="op">&gt;</span> {
     <span class="self">self</span>
       .<span class="ident">by_edge</span>
-      .<span class="ident">index_mut</span>(<span class="ident">index</span>.<span class="ident">max</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">vertices</span> <span class="op">*</span> <span class="ident">index</span>.<span class="ident">min</span>)
+      .<span class="ident">index_mut</span>(<span class="ident">index</span>.<span class="ident">max</span>.<span class="number">0</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">vertices</span> <span class="op">*</span> <span class="ident">index</span>.<span class="ident">min</span>.<span class="number">0</span>)
   }
 }
 
 <span class="kw">impl</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">IndexEdge</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">IndexIntersectionSet</span> {
   <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SparseIndex</span><span class="op">&gt;</span>;
   <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">IndexEdge</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SparseIndex</span><span class="op">&gt;</span> {
-    <span class="self">self</span>.<span class="ident">by_edge</span>.<span class="ident">index</span>(<span class="ident">index</span>.<span class="ident">max</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">vertices</span> <span class="op">*</span> <span class="ident">index</span>.<span class="ident">min</span>)
+    <span class="self">self</span>
+      .<span class="ident">by_edge</span>
+      .<span class="ident">index</span>(<span class="ident">index</span>.<span class="ident">max</span>.<span class="number">0</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">vertices</span> <span class="op">*</span> <span class="ident">index</span>.<span class="ident">min</span>.<span class="number">0</span>)
   }
 }
 
@@ -370,11 +411,30 @@
 <span class="comment">// Invariants:</span>
 <span class="comment">//   Edge0 &lt; Edge1</span>
 <span class="comment">//   Edge.0 &lt; Edge.1</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
 <span class="comment">// FIXME: Should not be pub.</span>
 <span class="kw">struct</span> <span class="ident">Isect</span> {
   <span class="ident">edge0</span>: <span class="ident">IsectEdge</span>,
   <span class="ident">edge1</span>: <span class="ident">IsectEdge</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Isect</span> {
+  <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Isect</span> {
+    <span class="ident">Isect</span> {
+      <span class="ident">edge0</span>: <span class="ident">IsectEdge</span> {
+        <span class="ident">vertex0</span>: <span class="ident">PointId::INVALID</span>,
+        <span class="ident">vertex1</span>: <span class="ident">PointId::INVALID</span>,
+        <span class="ident">next</span>: <span class="prelude-val">None</span>,
+        <span class="ident">prev</span>: <span class="prelude-val">None</span>,
+      },
+      <span class="ident">edge1</span>: <span class="ident">IsectEdge</span> {
+        <span class="ident">vertex0</span>: <span class="ident">PointId::INVALID</span>,
+        <span class="ident">vertex1</span>: <span class="ident">PointId::INVALID</span>,
+        <span class="ident">next</span>: <span class="prelude-val">None</span>,
+        <span class="ident">prev</span>: <span class="prelude-val">None</span>,
+      },
+    }
+  }
 }
 
 <span class="kw">impl</span> <span class="ident">Isect</span> {
@@ -432,11 +492,11 @@
   }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
 <span class="comment">// FIXME: Should not be pub</span>
 <span class="kw">struct</span> <span class="ident">IsectEdge</span> {
-  <span class="ident">vertex0</span>: <span class="ident">VertexId</span>,
-  <span class="ident">vertex1</span>: <span class="ident">VertexId</span>,
+  <span class="ident">vertex0</span>: <span class="ident">PointId</span>,
+  <span class="ident">vertex1</span>: <span class="ident">PointId</span>,
   <span class="ident">next</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SparseIndex</span><span class="op">&gt;</span>,
   <span class="ident">prev</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SparseIndex</span><span class="op">&gt;</span>,
 }
