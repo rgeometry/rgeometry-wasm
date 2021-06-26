@@ -366,7 +366,62 @@
 <span id="363">363</span>
 <span id="364">364</span>
 <span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="kw">use</span> <span class="ident">std::sync::atomic::AtomicI32</span>;
+<span class="kw">use</span> <span class="ident">std::sync::atomic::Ordering</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">wasm_bindgen::prelude</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">wasm_bindgen</span>]</span>
@@ -387,47 +442,28 @@
 <span class="comment">//   // update(f64)</span>
 <span class="comment">// }</span>
 
-<span class="kw">mod</span> <span class="ident">mouse</span> {
-  <span class="kw">use</span> <span class="ident">std::cell::Cell</span>;
-  <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
+<span class="kw">static</span> <span class="ident">MOUSE_X</span>: <span class="ident">AtomicI32</span> <span class="op">=</span> <span class="ident">AtomicI32::new</span>(<span class="number">0</span>);
+<span class="kw">static</span> <span class="ident">MOUSE_Y</span>: <span class="ident">AtomicI32</span> <span class="op">=</span> <span class="ident">AtomicI32::new</span>(<span class="number">0</span>);
 
-  <span class="kw">use</span> <span class="ident">gloo_events::EventListener</span>;
-  <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::{<span class="ident">JsCast</span>, <span class="ident">UnwrapThrowExt</span>};
-
-  <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MousePosition</span> {
-    <span class="kw">pub</span> <span class="ident">position</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&lt;</span>(<span class="ident">i32</span>, <span class="ident">i32</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
-  }
-
-  <span class="kw">impl</span> <span class="ident">MousePosition</span> {
-    <span class="comment">// FIXME: Allow other calls to update the cursor position.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MousePosition</span> {
-      <span class="kw">let</span> <span class="ident">position</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">Cell::new</span>((<span class="number">0</span>, <span class="number">0</span>)));
-      <span class="kw">let</span> <span class="ident">position_ref</span> <span class="op">=</span> <span class="ident">position</span>.<span class="ident">clone</span>();
-      <span class="kw">let</span> <span class="ident">canvas</span> <span class="op">=</span> <span class="kw">super</span><span class="ident">::playground::get_canvas</span>();
-      <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">EventListener::new</span>(<span class="kw-2">&amp;</span><span class="ident">canvas</span>, <span class="string">&quot;mousemove&quot;</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">dyn_ref</span>::<span class="op">&lt;</span><span class="ident">web_sys::MouseEvent</span><span class="op">&gt;</span>().<span class="ident">unwrap_throw</span>();
-        <span class="ident">position_ref</span>.<span class="ident">set</span>((<span class="ident">event</span>.<span class="ident">offset_x</span>(), <span class="ident">event</span>.<span class="ident">offset_y</span>()));
-      });
-      <span class="ident">listener</span>.<span class="ident">forget</span>();
-      <span class="ident">MousePosition</span> { <span class="ident">position</span> }
-    }
-  }
+<span class="kw">fn</span> <span class="ident">get_mouse</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">i32</span>, <span class="ident">i32</span>) {
+  (<span class="ident">MOUSE_X</span>.<span class="ident">load</span>(<span class="ident">Relaxed</span>), <span class="ident">MOUSE_Y</span>.<span class="ident">load</span>(<span class="ident">Relaxed</span>))
 }
 
-<span class="macro">thread_local!</span> {
-  <span class="kw">static</span> <span class="ident">MOUSE</span>: <span class="ident">mouse::MousePosition</span> <span class="op">=</span> <span class="ident">mouse::MousePosition::new</span>();
+<span class="kw">fn</span> <span class="ident">set_mouse</span>(<span class="ident">x</span>: <span class="ident">i32</span>, <span class="ident">y</span>: <span class="ident">i32</span>) {
+  <span class="ident">MOUSE_X</span>.<span class="ident">store</span>(<span class="ident">x</span>, <span class="ident">Relaxed</span>);
+  <span class="ident">MOUSE_Y</span>.<span class="ident">store</span>(<span class="ident">y</span>, <span class="ident">Relaxed</span>);
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">playground</span> {
+  <span class="kw">use</span> <span class="kw">super</span><span class="ident">::log</span>;
   <span class="kw">use</span> <span class="ident">num::BigRational</span>;
   <span class="kw">use</span> <span class="ident">rgeometry::data</span>::<span class="kw-2">*</span>;
 
-  <span class="kw">use</span> <span class="ident">gloo_events::EventListener</span>;
+  <span class="kw">use</span> <span class="ident">gloo_events</span>::{<span class="ident">EventListener</span>, <span class="ident">EventListenerOptions</span>};
   <span class="kw">use</span> <span class="ident">num</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">rand::distributions::Standard</span>;
   <span class="comment">// use rand::distributions::Uniform;</span>
   <span class="kw">use</span> <span class="ident">rand::Rng</span>;
-  <span class="kw">use</span> <span class="ident">std::cell</span>::{<span class="ident">Cell</span>, <span class="ident">RefCell</span>};
   <span class="kw">use</span> <span class="ident">std::convert</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
   <span class="comment">// use std::ops::DerefMut;</span>
@@ -436,6 +472,19 @@
   <span class="kw">use</span> <span class="ident">wasm_bindgen::prelude</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::{<span class="ident">JsCast</span>, <span class="ident">UnwrapThrowExt</span>};
   <span class="kw">use</span> <span class="ident">web_sys::Path2d</span>;
+
+  <span class="kw">use</span> <span class="ident">once_cell::sync::Lazy</span>;
+  <span class="kw">use</span> <span class="ident">std::sync::Mutex</span>;
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upd_mouse</span>(<span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">web_sys::MouseEvent</span>) {
+    <span class="kw">super</span><span class="ident">::set_mouse</span>(<span class="ident">event</span>.<span class="ident">offset_x</span>(), <span class="ident">event</span>.<span class="ident">offset_y</span>())
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upd_touch</span>(<span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">web_sys::TouchEvent</span>) {
+    <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">touches</span>().<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>().<span class="ident">client_x</span>();
+    <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">touches</span>().<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>().<span class="ident">client_y</span>();
+    <span class="kw">super</span><span class="ident">::set_mouse</span>(<span class="ident">x</span>, <span class="ident">y</span>)
+  }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_device_pixel_ratio</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
     <span class="ident">web_sys::window</span>().<span class="ident">unwrap</span>().<span class="ident">device_pixel_ratio</span>()
@@ -472,7 +521,7 @@
   }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">absolute_mouse_position</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">i32</span>, <span class="ident">i32</span>) {
-    <span class="kw">super</span><span class="ident">::MOUSE</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">mouse</span><span class="op">|</span> <span class="ident">mouse</span>.<span class="ident">position</span>.<span class="ident">get</span>())
+    <span class="kw">super</span><span class="ident">::get_mouse</span>()
   }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mouse_position</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">f64</span>, <span class="ident">f64</span>) {
@@ -614,74 +663,92 @@
     <span class="ident">n</span>: <span class="ident">usize</span>,
     <span class="kw-2">mut</span> <span class="ident">original_pts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span>,
   ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="macro">thread_local!</span> {
-      <span class="kw">static</span> <span class="ident">POINTS</span>: <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>,<span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RefCell::new</span>(<span class="macro">vec!</span>[]);
-      <span class="kw">static</span> <span class="ident">SELECTED</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>,<span class="ident">i32</span>,<span class="ident">i32</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Cell::new</span>(<span class="ident">Option::None</span>);
-    }
+    <span class="kw">static</span> <span class="ident">SELECTED</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">i32</span>, <span class="ident">i32</span>)<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Mutex::new</span>(<span class="prelude-val">None</span>));
+    <span class="kw">static</span> <span class="ident">POINTS</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Mutex::new</span>(<span class="macro">vec!</span>[]));
+
     <span class="kw">static</span> <span class="ident">START</span>: <span class="ident">Once</span> <span class="op">=</span> <span class="ident">Once::new</span>();
 
     <span class="ident">START</span>.<span class="ident">call_once</span>(<span class="op">|</span><span class="op">|</span> {
-      <span class="kw">crate</span><span class="ident">::log</span>(<span class="string">&quot;Installing handlers.&quot;</span>);
-      <span class="ident">POINTS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">pts</span><span class="op">|</span> {
+      <span class="ident">log</span>(<span class="string">&quot;Installing handlers.&quot;</span>);
+
+      {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand::thread_rng</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mut_ptrs</span> <span class="op">=</span> <span class="ident">pts</span>.<span class="ident">borrow_mut</span>();
-        <span class="ident">mut_ptrs</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">original_pts</span>);
+        <span class="ident">pts</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">original_pts</span>);
         <span class="kw">let</span> (<span class="ident">width</span>, <span class="ident">height</span>) <span class="op">=</span> <span class="ident">get_viewport</span>();
         <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">Transform::scale</span>(<span class="ident">Vector</span>([<span class="ident">width</span> <span class="op">*</span> <span class="number">0.8</span>, <span class="ident">height</span> <span class="op">*</span> <span class="number">0.8</span>]))
           <span class="op">*</span> <span class="ident">Transform::translate</span>(<span class="ident">Vector</span>([<span class="op">-</span><span class="number">0.5</span>, <span class="op">-</span><span class="number">0.5</span>]));
-        <span class="kw">while</span> <span class="ident">mut_ptrs</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">n</span> {
+        <span class="kw">while</span> <span class="ident">pts</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">n</span> {
           <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">rng</span>.<span class="ident">sample</span>(<span class="ident">Standard</span>);
           <span class="kw">let</span> <span class="ident">pt</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t</span> <span class="op">*</span> <span class="ident">pt</span>;
-          <span class="ident">mut_ptrs</span>.<span class="ident">push</span>(<span class="ident">pt</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
+          <span class="ident">pts</span>.<span class="ident">push</span>(<span class="ident">pt</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
         }
-      });
-      <span class="kw">let</span> <span class="ident">ratio</span> <span class="op">=</span> <span class="ident">get_device_pixel_ratio</span>();
-      <span class="ident">on_mousedown</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+      }
+
+      <span class="kw">let</span> <span class="ident">handle_select</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> {
+        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">absolute_mouse_position</span>();
+        <span class="kw">let</span> <span class="ident">ratio</span> <span class="op">=</span> <span class="ident">get_device_pixel_ratio</span>();
         <span class="kw">let</span> <span class="ident">canvas</span> <span class="op">=</span> <span class="ident">get_canvas</span>();
         <span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">get_context_2d</span>(<span class="kw-2">&amp;</span><span class="ident">canvas</span>);
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">offset_x</span>();
-        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">offset_y</span>();
-        <span class="ident">POINTS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">pts</span><span class="op">|</span> {
-          <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">pt</span>) <span class="kw">in</span> <span class="ident">pts</span>.<span class="ident">borrow</span>().<span class="ident">deref</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-            <span class="comment">// let pt: &amp;Point&lt;BigRational, 2&gt; = &amp;pt;</span>
-            <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>);
-            <span class="kw">let</span> <span class="ident">in_path</span> <span class="op">=</span> <span class="ident">context</span>.<span class="ident">is_point_in_path_with_path_2d_and_f64</span>(
-              <span class="kw-2">&amp;</span><span class="ident">path</span>,
-              <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
-              <span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
-            );
-            <span class="kw">let</span> <span class="ident">in_stroke</span> <span class="op">=</span> <span class="ident">context</span>.<span class="ident">is_point_in_stroke_with_path_and_x_and_y</span>(
-              <span class="kw-2">&amp;</span><span class="ident">path</span>,
-              <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
-              <span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
-            );
-            <span class="kw">if</span> <span class="ident">in_path</span> <span class="op">|</span><span class="op">|</span> <span class="ident">in_stroke</span> {
-              <span class="ident">SELECTED</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">selected</span><span class="op">|</span> <span class="ident">selected</span>.<span class="ident">set</span>(<span class="ident">Option::Some</span>((<span class="ident">i</span>, <span class="ident">x</span>, <span class="ident">y</span>))));
-              <span class="kw">break</span>;
-            }
+        <span class="kw">let</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+
+        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">pt</span>) <span class="kw">in</span> <span class="ident">pts</span>.<span class="ident">deref</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+          <span class="comment">// let pt: &amp;Point&lt;BigRational, 2&gt; = &amp;pt;</span>
+          <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>);
+          <span class="kw">let</span> <span class="ident">in_path</span> <span class="op">=</span> <span class="ident">context</span>.<span class="ident">is_point_in_path_with_path_2d_and_f64</span>(
+            <span class="kw-2">&amp;</span><span class="ident">path</span>,
+            <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
+            <span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
+          );
+          <span class="kw">let</span> <span class="ident">in_stroke</span> <span class="op">=</span> <span class="ident">context</span>.<span class="ident">is_point_in_stroke_with_path_and_x_and_y</span>(
+            <span class="kw-2">&amp;</span><span class="ident">path</span>,
+            <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
+            <span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">ratio</span>,
+          );
+          <span class="kw">if</span> <span class="ident">in_path</span> <span class="op">|</span><span class="op">|</span> <span class="ident">in_stroke</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">selected</span> <span class="op">=</span> <span class="ident">SELECTED</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+            <span class="kw-2">*</span><span class="ident">selected</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">i</span>, <span class="ident">x</span>, <span class="ident">y</span>));
+            <span class="kw">break</span>;
           }
-        })
+        }
+      };
+      <span class="ident">on_mousedown</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+        <span class="ident">upd_mouse</span>(<span class="ident">event</span>);
+        <span class="ident">handle_select</span>();
       });
-      <span class="ident">on_mouseup</span>(<span class="op">|</span><span class="ident">_event</span><span class="op">|</span> <span class="ident">SELECTED</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">selected</span><span class="op">|</span> <span class="ident">selected</span>.<span class="ident">set</span>(<span class="prelude-val">None</span>)));
-      <span class="ident">on_mousemove</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
-        <span class="ident">SELECTED</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">selected</span><span class="op">|</span> {
-          <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Option::Some</span>((<span class="ident">i</span>, <span class="ident">x</span>, <span class="ident">y</span>)) <span class="op">=</span> <span class="ident">selected</span>.<span class="ident">get</span>() {
-            <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">inv_canvas_position</span>(<span class="ident">x</span>, <span class="ident">y</span>);
-            <span class="kw">let</span> (<span class="ident">ox</span>, <span class="ident">oy</span>) <span class="op">=</span> <span class="ident">inv_canvas_position</span>(<span class="ident">event</span>.<span class="ident">offset_x</span>(), <span class="ident">event</span>.<span class="ident">offset_y</span>());
-            <span class="kw">let</span> <span class="ident">dx</span> <span class="op">=</span> (<span class="ident">ox</span> <span class="op">-</span> <span class="ident">x</span>) <span class="kw">as</span> <span class="ident">f64</span>;
-            <span class="kw">let</span> <span class="ident">dy</span> <span class="op">=</span> (<span class="ident">oy</span> <span class="op">-</span> <span class="ident">y</span>) <span class="kw">as</span> <span class="ident">f64</span>;
-            <span class="ident">selected</span>.<span class="ident">set</span>(<span class="prelude-val">Some</span>((<span class="ident">i</span>, <span class="ident">event</span>.<span class="ident">offset_x</span>(), <span class="ident">event</span>.<span class="ident">offset_y</span>())));
-            <span class="ident">POINTS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">pts</span><span class="op">|</span> {
-              <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">pts</span>.<span class="ident">borrow_mut</span>();
-              <span class="kw">let</span> <span class="ident">pt</span> <span class="op">=</span> <span class="ident">vec</span>.<span class="ident">index</span>(<span class="ident">i</span>);
-              <span class="kw">let</span> <span class="ident">vector</span>: <span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vector</span>([<span class="ident">dx</span>, <span class="ident">dy</span>]).<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
-              <span class="ident">vec</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">pt</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">vector</span>;
-            });
-          }
-        });
-      })
+      <span class="ident">on_touchstart</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+        <span class="ident">upd_touch</span>(<span class="ident">event</span>);
+        <span class="ident">handle_select</span>();
+      });
+      <span class="ident">on_mouseup</span>(<span class="op">|</span><span class="ident">_event</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">SELECTED</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="prelude-val">None</span>);
+      <span class="ident">on_touchend</span>(<span class="op">|</span><span class="ident">_event</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">SELECTED</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="prelude-val">None</span>);
+      <span class="ident">on_touchmove</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+        <span class="kw">if</span> <span class="ident">SELECTED</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">is_some</span>() {
+          <span class="ident">event</span>.<span class="ident">prevent_default</span>();
+        }
+      });
     });
-    <span class="ident">POINTS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">pts</span><span class="op">|</span> <span class="ident">pts</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>())
+
+    <span class="comment">// Update points if mouse moved.</span>
+    {
+      <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">selected</span> <span class="op">=</span> <span class="ident">SELECTED</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+
+      <span class="kw">let</span> (<span class="ident">mouse_x</span>, <span class="ident">mouse_y</span>) <span class="op">=</span> <span class="ident">absolute_mouse_position</span>();
+      <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">i</span>, <span class="ident">x</span>, <span class="ident">y</span>)) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">selected</span> {
+        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">inv_canvas_position</span>(<span class="ident">x</span>, <span class="ident">y</span>);
+        <span class="kw">let</span> (<span class="ident">ox</span>, <span class="ident">oy</span>) <span class="op">=</span> <span class="ident">inv_canvas_position</span>(<span class="ident">mouse_x</span>, <span class="ident">mouse_y</span>);
+        <span class="kw">let</span> <span class="ident">dx</span> <span class="op">=</span> (<span class="ident">ox</span> <span class="op">-</span> <span class="ident">x</span>) <span class="kw">as</span> <span class="ident">f64</span>;
+        <span class="kw">let</span> <span class="ident">dy</span> <span class="op">=</span> (<span class="ident">oy</span> <span class="op">-</span> <span class="ident">y</span>) <span class="kw">as</span> <span class="ident">f64</span>;
+        <span class="kw-2">*</span><span class="ident">selected</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">i</span>, <span class="ident">mouse_x</span>, <span class="ident">mouse_y</span>));
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">pt</span> <span class="op">=</span> <span class="ident">pts</span>.<span class="ident">index</span>(<span class="ident">i</span>);
+        <span class="kw">let</span> <span class="ident">vector</span>: <span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vector</span>([<span class="ident">dx</span>, <span class="ident">dy</span>]).<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+        <span class="ident">pts</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">pt</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">vector</span>;
+      }
+    }
+
+    <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>()
   }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_canvas_click</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">callback</span>: <span class="ident">F</span>)
@@ -722,6 +789,45 @@
     <span class="kw">let</span> <span class="ident">canvas</span> <span class="op">=</span> <span class="kw">super</span><span class="ident">::playground::get_canvas</span>();
     <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">EventListener::new</span>(<span class="kw-2">&amp;</span><span class="ident">canvas</span>, <span class="string">&quot;mouseup&quot;</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
       <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">dyn_ref</span>::<span class="op">&lt;</span><span class="ident">web_sys::MouseEvent</span><span class="op">&gt;</span>().<span class="ident">unwrap_throw</span>();
+      <span class="ident">callback</span>(<span class="ident">event</span>)
+    });
+    <span class="ident">listener</span>.<span class="ident">forget</span>();
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_touchstart</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">callback</span>: <span class="ident">F</span>)
+  <span class="kw">where</span>
+    <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">web_sys::TouchEvent</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+  {
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">EventListenerOptions::enable_prevent_default</span>();
+    <span class="kw">let</span> <span class="ident">canvas</span> <span class="op">=</span> <span class="kw">super</span><span class="ident">::playground::get_canvas</span>();
+    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">EventListener::new_with_options</span>(<span class="kw-2">&amp;</span><span class="ident">canvas</span>, <span class="string">&quot;touchstart&quot;</span>, <span class="ident">options</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+      <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">dyn_ref</span>::<span class="op">&lt;</span><span class="ident">web_sys::TouchEvent</span><span class="op">&gt;</span>().<span class="ident">unwrap_throw</span>();
+      <span class="ident">callback</span>(<span class="ident">event</span>)
+    });
+    <span class="ident">listener</span>.<span class="ident">forget</span>();
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_touchend</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">callback</span>: <span class="ident">F</span>)
+  <span class="kw">where</span>
+    <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">web_sys::TouchEvent</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+  {
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">EventListenerOptions::enable_prevent_default</span>();
+    <span class="kw">let</span> <span class="ident">canvas</span> <span class="op">=</span> <span class="kw">super</span><span class="ident">::playground::get_canvas</span>();
+    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">EventListener::new_with_options</span>(<span class="kw-2">&amp;</span><span class="ident">canvas</span>, <span class="string">&quot;touchend&quot;</span>, <span class="ident">options</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+      <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">dyn_ref</span>::<span class="op">&lt;</span><span class="ident">web_sys::TouchEvent</span><span class="op">&gt;</span>().<span class="ident">unwrap_throw</span>();
+      <span class="ident">callback</span>(<span class="ident">event</span>)
+    });
+    <span class="ident">listener</span>.<span class="ident">forget</span>();
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_touchmove</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">callback</span>: <span class="ident">F</span>)
+  <span class="kw">where</span>
+    <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">web_sys::TouchEvent</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+  {
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">EventListenerOptions::enable_prevent_default</span>();
+    <span class="kw">let</span> <span class="ident">canvas</span> <span class="op">=</span> <span class="kw">super</span><span class="ident">::playground::get_canvas</span>();
+    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">EventListener::new_with_options</span>(<span class="kw-2">&amp;</span><span class="ident">canvas</span>, <span class="string">&quot;touchmove&quot;</span>, <span class="ident">options</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">event</span><span class="op">|</span> {
+      <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">dyn_ref</span>::<span class="op">&lt;</span><span class="ident">web_sys::TouchEvent</span><span class="op">&gt;</span>().<span class="ident">unwrap_throw</span>();
       <span class="ident">callback</span>(<span class="ident">event</span>)
     });
     <span class="ident">listener</span>.<span class="ident">forget</span>();

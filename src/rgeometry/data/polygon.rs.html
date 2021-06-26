@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/rgeometry-26a631e95254b331/01ea084/src/data/polygon.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>polygon.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/rgeometry-26a631e95254b331/1fe0468/src/data/polygon.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>polygon.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../rgeometry/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -518,6 +518,46 @@
 <span id="515">515</span>
 <span id="516">516</span>
 <span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// use claim::debug_assert_ok;</span>
 <span class="kw">use</span> <span class="ident">num_rational::BigRational</span>;
@@ -530,9 +570,11 @@
 <span class="kw">use</span> <span class="ident">std::ops</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::array::Orientation</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::DirectedEdge</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::Point</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data::Vector</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::Error</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::Extended</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::PolygonScalar</span>;
 
 <span class="kw">mod</span> <span class="ident">iter</span>;
@@ -543,13 +585,30 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PositionId</span>(<span class="ident">usize</span>);
-<span class="comment">// pub type PositionId = usize;</span>
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PositionId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
+  <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">pid</span>: <span class="ident">PositionId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="ident">pid</span>.<span class="number">0</span>
+  }
+}
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RingId</span>(<span class="ident">usize</span>);
 
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">RingId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
+  <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">rid</span>: <span class="ident">RingId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="ident">rid</span>.<span class="number">0</span>
+  }
+}
+
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PointId</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">usize</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PointId</span>(<span class="ident">usize</span>);
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PointId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
+  <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">pid</span>: <span class="ident">PointId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="ident">pid</span>.<span class="number">0</span>
+  }
+}
 
 <span class="kw">impl</span> <span class="ident">std::fmt::Debug</span> <span class="kw">for</span> <span class="ident">PointId</span> {
   <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
@@ -559,6 +618,9 @@
 
 <span class="kw">impl</span> <span class="ident">PointId</span> {
   <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">INVALID</span>: <span class="ident">PointId</span> <span class="op">=</span> <span class="ident">PointId</span>(<span class="ident">usize::MAX</span>);
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">usize</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="self">self</span>.<span class="number">0</span>
+  }
 }
 
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
@@ -615,22 +677,19 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
   <span class="comment">// Key: PointId</span>
   <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">points</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-  <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">ring_index</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RingId</span><span class="op">&gt;</span>,         <span class="comment">// Key: PointId</span>
-  <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">position_index</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PositionId</span><span class="op">&gt;</span>, <span class="comment">// Key: PointId</span>
+  <span class="comment">// Key: PointId</span>
+  <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">ring_index</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RingId</span><span class="op">&gt;</span>,
+  <span class="comment">// Key: PointId</span>
+  <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">position_index</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PositionId</span><span class="op">&gt;</span>,
   <span class="comment">// Ring 0 is boundary and ccw</span>
   <span class="comment">// Ring n+1 is a hole and cw.</span>
+  <span class="comment">// Outer key: RingId</span>
+  <span class="comment">// Inner key: PositionId</span>
   <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">rings</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PointId</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-  <span class="comment">// pub(crate) vertices: Vec&lt;Point&lt;T, 2&gt;&gt;, // VertexId -&gt; &amp;Point&lt;T,2&gt;</span>
-  <span class="comment">// pub(crate) order: Vec&lt;VertexId&gt;,       // Position -&gt; VertexId</span>
-  <span class="comment">// pub(crate) positions: Vec&lt;PositionId&gt;, // VertexId -&gt; Position</span>
-  <span class="comment">// pub(crate) boundary: usize,</span>
-  <span class="comment">// pub(crate) holes: Vec&lt;usize&gt;,</span>
 }
-<span class="comment">// loops: Vec&lt;Vec&lt;VertexId&gt;&gt;</span>
-<span class="comment">// vertex_loop: Vec&lt;RingId&gt;</span>
-<span class="comment">// vertex_position: Vec&lt;PositionId&gt;</span>
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+  <span class="doccomment">/// $O(1)$</span>
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">vertices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
   <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
@@ -641,14 +700,10 @@
       <span class="ident">ring_index</span>: <span class="macro">vec!</span>[<span class="ident">RingId</span>(<span class="number">0</span>); <span class="ident">len</span>],
       <span class="ident">position_index</span>: (<span class="number">0</span>..<span class="ident">len</span>).<span class="ident">map</span>(<span class="ident">PositionId</span>).<span class="ident">collect</span>(),
       <span class="ident">rings</span>: <span class="macro">vec!</span>[(<span class="number">0</span>..<span class="ident">len</span>).<span class="ident">map</span>(<span class="ident">PointId</span>).<span class="ident">collect</span>()],
-      <span class="comment">// vertices,</span>
-      <span class="comment">// order: (0..len).map(VertexId).collect(),</span>
-      <span class="comment">// positions: (0..len).map(PositionId).collect(),</span>
-      <span class="comment">// boundary: len,</span>
-      <span class="comment">// holes: vec![],</span>
     }
   }
 
+  <span class="doccomment">/// $O(n^2)$</span>
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">points</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
   <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
@@ -688,11 +743,16 @@
       <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InsufficientVertices</span>);
     }
     <span class="comment">// Is counter-clockwise</span>
-    <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">signed_area_2x</span>().<span class="ident">is_positive</span>() {
+    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">orientation</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">Orientation::CounterClockWise</span> {
       <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ClockWiseViolation</span>);
     }
     <span class="comment">// Has no self intersections.</span>
-    <span class="comment">// TODO. Only check line intersections. Overlapping vertices are OK.</span>
+    <span class="comment">// XXX: Hm, allow overlapping (but not crossing) edges in the weakly check?</span>
+    <span class="kw">let</span> <span class="ident">edges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DirectedEdge</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter_boundary_edges</span>().<span class="ident">collect</span>();
+    <span class="kw">let</span> <span class="ident">isects</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::algorithms::segment_intersections</span>(<span class="kw-2">&amp;</span><span class="ident">edges</span>).<span class="ident">next</span>();
+    <span class="kw">if</span> <span class="ident">isects</span>.<span class="ident">is_some</span>() {
+      <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SelfIntersections</span>);
+    }
     <span class="prelude-val">Ok</span>(())
   }
 
@@ -700,26 +760,26 @@
   <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
-    <span class="kw">let</span> <span class="ident">xs</span>: <span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>
+    <span class="kw">let</span> <span class="ident">xs</span>: <span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T::ExtendedSigned</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>
       .<span class="ident">iter_boundary_edges</span>()
       .<span class="ident">map</span>(<span class="op">|</span><span class="ident">edge</span><span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">edge</span>.<span class="ident">src</span>.<span class="ident">as_vec</span>();
-        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">edge</span>.<span class="ident">dst</span>.<span class="ident">as_vec</span>();
+        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">edge</span>.<span class="ident">src</span>.<span class="ident">as_vec</span>().<span class="ident">cast</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">extend_signed</span>());
+        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">edge</span>.<span class="ident">dst</span>.<span class="ident">as_vec</span>().<span class="ident">cast</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">extend_signed</span>());
         (<span class="ident">p</span> <span class="op">+</span> <span class="ident">q</span>) <span class="op">*</span> (<span class="ident">p</span>.<span class="number">0</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">q</span>.<span class="number">0</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">q</span>.<span class="number">0</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">p</span>.<span class="number">0</span>[<span class="number">1</span>].<span class="ident">clone</span>())
       })
       .<span class="ident">sum</span>();
-    <span class="kw">let</span> <span class="ident">three</span> <span class="op">=</span> <span class="ident">T::from_usize</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
-    <span class="ident">Point::from</span>(<span class="ident">xs</span> <span class="op">/</span> (<span class="ident">three</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">signed_area_2x</span>()))
+    <span class="kw">let</span> <span class="ident">three</span> <span class="op">=</span> <span class="ident">T::ExtendedSigned::from_usize</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
+    <span class="ident">Point::from</span>(<span class="ident">xs</span> <span class="op">/</span> (<span class="ident">three</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">signed_area_2x</span>())).<span class="ident">cast</span>(<span class="ident">Extended::truncate_signed</span>)
   }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">signed_area</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>
   <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
-    <span class="self">self</span>.<span class="ident">signed_area_2x</span>() <span class="op">/</span> <span class="ident">T::from_usize</span>(<span class="number">2</span>).<span class="ident">unwrap</span>()
+    <span class="ident">Extended::truncate_signed</span>(<span class="self">self</span>.<span class="ident">signed_area_2x</span>() <span class="op">/</span> <span class="ident">T::ExtendedSigned::from_usize</span>(<span class="number">2</span>).<span class="ident">unwrap</span>())
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">signed_area_2x</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">signed_area_2x</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::ExtendedSigned</span>
   <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
@@ -728,9 +788,20 @@
       .<span class="ident">map</span>(<span class="op">|</span><span class="ident">edge</span><span class="op">|</span> {
         <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">edge</span>.<span class="ident">src</span>;
         <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">edge</span>.<span class="ident">dst</span>;
-        <span class="ident">p</span>.<span class="ident">array</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">q</span>.<span class="ident">array</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">q</span>.<span class="ident">array</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">p</span>.<span class="ident">array</span>[<span class="number">1</span>].<span class="ident">clone</span>()
+        <span class="ident">p</span>.<span class="ident">array</span>[<span class="number">0</span>].<span class="ident">clone</span>().<span class="ident">extend_signed</span>() <span class="op">*</span> <span class="ident">q</span>.<span class="ident">array</span>[<span class="number">1</span>].<span class="ident">clone</span>().<span class="ident">extend_signed</span>()
+          <span class="op">-</span> <span class="ident">q</span>.<span class="ident">array</span>[<span class="number">0</span>].<span class="ident">clone</span>().<span class="ident">extend_signed</span>() <span class="op">*</span> <span class="ident">p</span>.<span class="ident">array</span>[<span class="number">1</span>].<span class="ident">clone</span>().<span class="ident">extend_signed</span>()
       })
       .<span class="ident">sum</span>()
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">orientation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Orientation</span>
+  <span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
+  {
+    <span class="kw">match</span> <span class="self">self</span>.<span class="ident">iter_boundary</span>().<span class="ident">min_by</span>(<span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">point</span>().<span class="ident">cmp</span>(<span class="ident">b</span>.<span class="ident">point</span>())) {
+      <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CoLinear</span>,
+      <span class="prelude-val">Some</span>(<span class="ident">cursor</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cursor</span>.<span class="ident">orientation</span>(),
+    }
   }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">point</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">PointId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span> {
@@ -864,13 +935,17 @@
   <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
-    <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">signed_area_2x</span>().<span class="ident">is_positive</span>() {
-      <span class="kw">let</span> <span class="ident">root_position</span> <span class="op">=</span> <span class="ident">Position</span> {
-        <span class="ident">ring_id</span>: <span class="ident">RingId</span>(<span class="number">0</span>),
-        <span class="ident">position_id</span>: <span class="ident">PositionId</span>(<span class="number">0</span>),
-        <span class="ident">size</span>: <span class="self">self</span>.<span class="ident">rings</span>[<span class="number">0</span>].<span class="ident">len</span>(),
-      };
-      <span class="self">self</span>.<span class="ident">vertices_reverse</span>(<span class="ident">root_position</span>, <span class="ident">root_position</span>.<span class="ident">prev</span>())
+    <span class="kw">match</span> <span class="self">self</span>.<span class="ident">orientation</span>() {
+      <span class="ident">Orientation::CounterClockWise</span> <span class="op">=</span><span class="op">&gt;</span> (),
+      <span class="ident">Orientation::CoLinear</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Polygon is non-orientable.&quot;</span>),
+      <span class="ident">Orientation::ClockWise</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">root_position</span> <span class="op">=</span> <span class="ident">Position</span> {
+          <span class="ident">ring_id</span>: <span class="ident">RingId</span>(<span class="number">0</span>),
+          <span class="ident">position_id</span>: <span class="ident">PositionId</span>(<span class="number">0</span>),
+          <span class="ident">size</span>: <span class="self">self</span>.<span class="ident">rings</span>[<span class="number">0</span>].<span class="ident">len</span>(),
+        };
+        <span class="self">self</span>.<span class="ident">vertices_reverse</span>(<span class="ident">root_position</span>, <span class="ident">root_position</span>.<span class="ident">prev</span>())
+      }
     }
   }
 
@@ -1036,6 +1111,11 @@
 <span class="comment">//   type Iter: Iterator&lt;Item = (VertexId, VertexId, VertexId)&gt;;</span>
 <span class="comment">//   fn triangulate(&amp;self) -&gt; Self::Iter;</span>
 <span class="comment">// }</span>
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">tests</span> {
+  <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+}
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="rgeometry" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>
