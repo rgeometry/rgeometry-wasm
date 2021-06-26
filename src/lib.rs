@@ -1,3 +1,5 @@
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering::*;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -18,47 +20,28 @@ extern "C" {
 //   // update(f64)
 // }
 
-mod mouse {
-  use std::cell::Cell;
-  use std::rc::Rc;
+static MOUSE_X: AtomicI32 = AtomicI32::new(0);
+static MOUSE_Y: AtomicI32 = AtomicI32::new(0);
 
-  use gloo_events::EventListener;
-  use wasm_bindgen::{JsCast, UnwrapThrowExt};
-
-  pub struct MousePosition {
-    pub position: Rc<Cell<(i32, i32)>>,
-  }
-
-  impl MousePosition {
-    // FIXME: Allow other calls to update the cursor position.
-    pub fn new() -> MousePosition {
-      let position = Rc::new(Cell::new((0, 0)));
-      let position_ref = position.clone();
-      let canvas = super::playground::get_canvas();
-      let listener = EventListener::new(&canvas, "mousemove", move |event| {
-        let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
-        position_ref.set((event.offset_x(), event.offset_y()));
-      });
-      listener.forget();
-      MousePosition { position }
-    }
-  }
+fn get_mouse() -> (i32, i32) {
+  (MOUSE_X.load(Relaxed), MOUSE_Y.load(Relaxed))
 }
 
-thread_local! {
-  static MOUSE: mouse::MousePosition = mouse::MousePosition::new();
+fn set_mouse(x: i32, y: i32) {
+  MOUSE_X.store(x, Relaxed);
+  MOUSE_Y.store(y, Relaxed);
 }
 
 pub mod playground {
+  use super::log;
   use num::BigRational;
   use rgeometry::data::*;
 
-  use gloo_events::EventListener;
+  use gloo_events::{EventListener, EventListenerOptions};
   use num::*;
   use rand::distributions::Standard;
   // use rand::distributions::Uniform;
   use rand::Rng;
-  use std::cell::{Cell, RefCell};
   use std::convert::*;
   use std::ops::Deref;
   // use std::ops::DerefMut;
@@ -67,6 +50,19 @@ pub mod playground {
   use wasm_bindgen::prelude::*;
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
   use web_sys::Path2d;
+
+  use once_cell::sync::Lazy;
+  use std::sync::Mutex;
+
+  pub fn upd_mouse(event: &web_sys::MouseEvent) {
+    super::set_mouse(event.offset_x(), event.offset_y())
+  }
+
+  pub fn upd_touch(event: &web_sys::TouchEvent) {
+    let x = event.touches().get(0).unwrap().client_x();
+    let y = event.touches().get(0).unwrap().client_y();
+    super::set_mouse(x, y)
+  }
 
   pub fn get_device_pixel_ratio() -> f64 {
     web_sys::window().unwrap().device_pixel_ratio()
@@ -103,7 +99,7 @@ pub mod playground {
   }
 
   pub fn absolute_mouse_position() -> (i32, i32) {
-    super::MOUSE.with(|mouse| mouse.position.get())
+    super::get_mouse()
   }
 
   pub fn mouse_position() -> (f64, f64) {
@@ -245,74 +241,92 @@ pub mod playground {
     n: usize,
     mut original_pts: Vec<Point<BigRational, 2>>,
   ) -> Vec<Point<BigRational, 2>> {
-    thread_local! {
-      static POINTS: RefCell<Vec<Point<BigRational,2>>> = RefCell::new(vec![]);
-      static SELECTED: Cell<Option<(usize,i32,i32)>> = Cell::new(Option::None);
-    }
+    static SELECTED: Lazy<Mutex<Option<(usize, i32, i32)>>> = Lazy::new(|| Mutex::new(None));
+    static POINTS: Lazy<Mutex<Vec<Point<BigRational, 2>>>> = Lazy::new(|| Mutex::new(vec![]));
+
     static START: Once = Once::new();
 
     START.call_once(|| {
-      crate::log("Installing handlers.");
-      POINTS.with(|pts| {
+      log("Installing handlers.");
+
+      {
+        let mut pts = POINTS.lock().unwrap();
         let mut rng = rand::thread_rng();
-        let mut mut_ptrs = pts.borrow_mut();
-        mut_ptrs.append(&mut original_pts);
+        pts.append(&mut original_pts);
         let (width, height) = get_viewport();
         let t = Transform::scale(Vector([width * 0.8, height * 0.8]))
           * Transform::translate(Vector([-0.5, -0.5]));
-        while mut_ptrs.len() < n {
+        while pts.len() < n {
           let pt: Point<f64, 2> = rng.sample(Standard);
           let pt = &t * pt;
-          mut_ptrs.push(pt.try_into().unwrap())
+          pts.push(pt.try_into().unwrap())
         }
-      });
-      let ratio = get_device_pixel_ratio();
-      on_mousedown(move |event| {
+      }
+
+      let handle_select = || {
+        let (x, y) = absolute_mouse_position();
+        let ratio = get_device_pixel_ratio();
         let canvas = get_canvas();
         let context = get_context_2d(&canvas);
-        let x = event.offset_x();
-        let y = event.offset_y();
-        POINTS.with(|pts| {
-          for (i, pt) in pts.borrow().deref().iter().enumerate() {
-            // let pt: &Point<BigRational, 2> = &pt;
-            let path = point_path_2d(pt);
-            let in_path = context.is_point_in_path_with_path_2d_and_f64(
-              &path,
-              x as f64 * ratio,
-              y as f64 * ratio,
-            );
-            let in_stroke = context.is_point_in_stroke_with_path_and_x_and_y(
-              &path,
-              x as f64 * ratio,
-              y as f64 * ratio,
-            );
-            if in_path || in_stroke {
-              SELECTED.with(|selected| selected.set(Option::Some((i, x, y))));
-              break;
-            }
+        let pts = POINTS.lock().unwrap();
+
+        for (i, pt) in pts.deref().iter().enumerate() {
+          // let pt: &Point<BigRational, 2> = &pt;
+          let path = point_path_2d(pt);
+          let in_path = context.is_point_in_path_with_path_2d_and_f64(
+            &path,
+            x as f64 * ratio,
+            y as f64 * ratio,
+          );
+          let in_stroke = context.is_point_in_stroke_with_path_and_x_and_y(
+            &path,
+            x as f64 * ratio,
+            y as f64 * ratio,
+          );
+          if in_path || in_stroke {
+            let mut selected = SELECTED.lock().unwrap();
+            *selected = Some((i, x, y));
+            break;
           }
-        })
+        }
+      };
+      on_mousedown(move |event| {
+        upd_mouse(event);
+        handle_select();
       });
-      on_mouseup(|_event| SELECTED.with(|selected| selected.set(None)));
-      on_mousemove(move |event| {
-        SELECTED.with(|selected| {
-          if let Option::Some((i, x, y)) = selected.get() {
-            let (x, y) = inv_canvas_position(x, y);
-            let (ox, oy) = inv_canvas_position(event.offset_x(), event.offset_y());
-            let dx = (ox - x) as f64;
-            let dy = (oy - y) as f64;
-            selected.set(Some((i, event.offset_x(), event.offset_y())));
-            POINTS.with(|pts| {
-              let mut vec = pts.borrow_mut();
-              let pt = vec.index(i);
-              let vector: Vector<BigRational, 2> = Vector([dx, dy]).try_into().unwrap();
-              vec[i] = pt + &vector;
-            });
-          }
-        });
-      })
+      on_touchstart(move |event| {
+        upd_touch(event);
+        handle_select();
+      });
+      on_mouseup(|_event| *SELECTED.lock().unwrap() = None);
+      on_touchend(|_event| *SELECTED.lock().unwrap() = None);
+      on_touchmove(move |event| {
+        if SELECTED.lock().unwrap().is_some() {
+          event.prevent_default();
+        }
+      });
     });
-    POINTS.with(|pts| pts.borrow().clone())
+
+    // Update points if mouse moved.
+    {
+      let mut selected = SELECTED.lock().unwrap();
+
+      let (mouse_x, mouse_y) = absolute_mouse_position();
+      if let Some((i, x, y)) = *selected {
+        let (x, y) = inv_canvas_position(x, y);
+        let (ox, oy) = inv_canvas_position(mouse_x, mouse_y);
+        let dx = (ox - x) as f64;
+        let dy = (oy - y) as f64;
+        *selected = Some((i, mouse_x, mouse_y));
+
+        let mut pts = POINTS.lock().unwrap();
+        let pt = pts.index(i);
+        let vector: Vector<BigRational, 2> = Vector([dx, dy]).try_into().unwrap();
+        pts[i] = pt + &vector;
+      }
+    }
+
+    POINTS.lock().unwrap().clone()
   }
 
   pub fn on_canvas_click<F>(callback: F)
@@ -353,6 +367,45 @@ pub mod playground {
     let canvas = super::playground::get_canvas();
     let listener = EventListener::new(&canvas, "mouseup", move |event| {
       let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
+      callback(event)
+    });
+    listener.forget();
+  }
+
+  pub fn on_touchstart<F>(callback: F)
+  where
+    F: Fn(&web_sys::TouchEvent) + 'static,
+  {
+    let options = EventListenerOptions::enable_prevent_default();
+    let canvas = super::playground::get_canvas();
+    let listener = EventListener::new_with_options(&canvas, "touchstart", options, move |event| {
+      let event = event.dyn_ref::<web_sys::TouchEvent>().unwrap_throw();
+      callback(event)
+    });
+    listener.forget();
+  }
+
+  pub fn on_touchend<F>(callback: F)
+  where
+    F: Fn(&web_sys::TouchEvent) + 'static,
+  {
+    let options = EventListenerOptions::enable_prevent_default();
+    let canvas = super::playground::get_canvas();
+    let listener = EventListener::new_with_options(&canvas, "touchend", options, move |event| {
+      let event = event.dyn_ref::<web_sys::TouchEvent>().unwrap_throw();
+      callback(event)
+    });
+    listener.forget();
+  }
+
+  pub fn on_touchmove<F>(callback: F)
+  where
+    F: Fn(&web_sys::TouchEvent) + 'static,
+  {
+    let options = EventListenerOptions::enable_prevent_default();
+    let canvas = super::playground::get_canvas();
+    let listener = EventListener::new_with_options(&canvas, "touchmove", options, move |event| {
+      let event = event.dyn_ref::<web_sys::TouchEvent>().unwrap_throw();
       callback(event)
     });
     listener.forget();

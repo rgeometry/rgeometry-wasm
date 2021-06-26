@@ -11,9 +11,10 @@ rgeometry    = { git = "https://github.com/rgeometry/rgeometry", branch = "main"
 num          = "*"
 gloo-render  = { git = "https://github.com/rustwasm/gloo" }
 gloo-events  = "*"
-wasm-bindgen = "0.2.63"
+wasm-bindgen = "0.2.74"
 rand         = "0.8"
 getrandom    = { version = "0.2.2", features = ["js"] }
+once_cell    = "*"
 
 [dependencies.web-sys]
 version  = "0.3.4"
@@ -29,5 +30,8 @@ features = [
   'HtmlInputElement',
   'InputEvent',
   'MouseEvent',
+  'Touch',
+  'TouchEvent',
+  'TouchList',
   'Window',
 ]
