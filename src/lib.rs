@@ -35,6 +35,7 @@ fn set_mouse(x: i32, y: i32) {
 pub mod playground {
   use super::log;
   use num::BigRational;
+  use rgeometry::algorithms::polygonization::*;
   use rgeometry::data::*;
 
   use gloo_events::{EventListener, EventListenerOptions};
@@ -327,6 +328,26 @@ pub mod playground {
     }
 
     POINTS.lock().unwrap().clone()
+  }
+
+  pub fn with_polygon(n: usize) -> Polygon<BigRational> {
+    static POLYGON: Lazy<Mutex<Option<Polygon<BigRational>>>> = Lazy::new(|| Mutex::new(None));
+    let pts = with_points(n);
+    let mut data = POLYGON.lock().unwrap();
+    match (*data).as_mut() {
+      None => {
+        let p = two_opt_moves(pts, &mut rand::thread_rng()).unwrap();
+        *data = Some(p.clone());
+        p
+      }
+      Some(p) => {
+        for (idx, pt) in p.iter_mut().enumerate() {
+          *pt = pts[idx].clone();
+        }
+        resolve_self_intersections(p, &mut rand::thread_rng()).unwrap();
+        p.clone()
+      }
+    }
   }
 
   pub fn on_canvas_click<F>(callback: F)
