@@ -419,6 +419,27 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std::sync::atomic::AtomicI32</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic::Ordering</span>::<span class="kw-2">*</span>;
@@ -457,6 +478,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">playground</span> {
   <span class="kw">use</span> <span class="kw">super</span><span class="ident">::log</span>;
   <span class="kw">use</span> <span class="ident">num::BigRational</span>;
+  <span class="kw">use</span> <span class="ident">rgeometry::algorithms::polygonization</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">rgeometry::data</span>::<span class="kw-2">*</span>;
 
   <span class="kw">use</span> <span class="ident">gloo_events</span>::{<span class="ident">EventListener</span>, <span class="ident">EventListenerOptions</span>};
@@ -749,6 +771,26 @@
     }
 
     <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>()
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_polygon</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">BigRational</span><span class="op">&gt;</span> {
+    <span class="kw">static</span> <span class="ident">POLYGON</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">BigRational</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Mutex::new</span>(<span class="prelude-val">None</span>));
+    <span class="kw">let</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">with_points</span>(<span class="ident">n</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">POLYGON</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+    <span class="kw">match</span> (<span class="kw-2">*</span><span class="ident">data</span>).<span class="ident">as_mut</span>() {
+      <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">two_opt_moves</span>(<span class="ident">pts</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rand::thread_rng</span>()).<span class="ident">unwrap</span>();
+        <span class="kw-2">*</span><span class="ident">data</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>.<span class="ident">clone</span>());
+        <span class="ident">p</span>
+      }
+      <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">for</span> (<span class="ident">idx</span>, <span class="ident">pt</span>) <span class="kw">in</span> <span class="ident">p</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
+          <span class="kw-2">*</span><span class="ident">pt</span> <span class="op">=</span> <span class="ident">pts</span>[<span class="ident">idx</span>].<span class="ident">clone</span>();
+        }
+        <span class="ident">resolve_self_intersections</span>(<span class="ident">p</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rand::thread_rng</span>()).<span class="ident">unwrap</span>();
+        <span class="ident">p</span>.<span class="ident">clone</span>()
+      }
+    }
   }
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_canvas_click</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">callback</span>: <span class="ident">F</span>)
