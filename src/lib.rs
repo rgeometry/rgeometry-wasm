@@ -208,7 +208,7 @@ pub mod playground {
     context.stroke();
   }
 
-  pub fn point_path_2d(pt: &Point<BigRational, 2>) -> Path2d {
+  pub fn point_path_2d(pt: &Point<BigRational, 2>, scale: f64) -> Path2d {
     let pt: Point<f64, 2> = pt.into();
 
     let path = Path2d::new().unwrap();
@@ -216,7 +216,7 @@ pub mod playground {
       .arc(
         *pt.x_coord(),
         *pt.y_coord(),
-        from_pixels(15), // radius
+        scale * from_pixels(15), // radius
         0.0,
         std::f64::consts::PI * 2.,
       )
@@ -228,11 +228,22 @@ pub mod playground {
     let canvas = get_canvas();
     let context = get_context_2d(&canvas);
 
-    let path = point_path_2d(pt);
+    let path = point_path_2d(pt, 1.0);
 
     context.set_fill_style(&JsValue::from_str("green"));
     context.fill_with_path_2d(&path);
     context.stroke_with_path(&path);
+  }
+
+  pub fn render_fixed_point(pt: &Point<BigRational, 2>) {
+    let canvas = get_canvas();
+    let context = get_context_2d(&canvas);
+
+    let path = point_path_2d(pt, 0.5);
+
+    context.set_fill_style(&JsValue::from_str("grey"));
+    context.stroke_with_path(&path);
+    context.fill_with_path_2d(&path);
   }
 
   pub fn with_points(n: usize) -> Vec<Point<BigRational, 2>> {
@@ -273,7 +284,7 @@ pub mod playground {
 
         for (i, pt) in pts.deref().iter().enumerate() {
           // let pt: &Point<BigRational, 2> = &pt;
-          let path = point_path_2d(pt);
+          let path = point_path_2d(pt, 1.0);
           let in_path = context.is_point_in_path_with_path_2d_and_f64(
             &path,
             x as f64 * ratio,
