@@ -33,7 +33,6 @@ fn set_mouse(x: i32, y: i32) {
 }
 
 pub mod playground {
-  use super::log;
   use num::BigRational;
   use rgeometry::algorithms::polygonization::*;
   use rgeometry::data::*;
@@ -48,7 +47,6 @@ pub mod playground {
   // use std::ops::DerefMut;
   use std::ops::Index;
   use std::sync::Once;
-  use wasm_bindgen::prelude::*;
   use wasm_bindgen::{JsCast, UnwrapThrowExt};
   use web_sys::Path2d;
 
