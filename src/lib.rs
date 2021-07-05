@@ -66,12 +66,11 @@ pub mod playground {
   pub fn get_device_pixel_ratio() -> f64 {
     web_sys::window().unwrap().device_pixel_ratio()
   }
-  pub fn get_document() -> web_sys::Document {
+  pub fn document() -> web_sys::Document {
     web_sys::window().unwrap().document().unwrap()
   }
-  pub fn get_canvas() -> web_sys::HtmlCanvasElement {
-    let document = get_document();
-    let canvas = document.get_element_by_id("canvas").unwrap();
+  pub fn canvas() -> web_sys::HtmlCanvasElement {
+    let canvas = document().get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas
       .dyn_into::<web_sys::HtmlCanvasElement>()
       .map_err(|_| ())
@@ -79,8 +78,8 @@ pub mod playground {
     canvas
   }
 
-  pub fn get_context_2d(canvas: &web_sys::HtmlCanvasElement) -> web_sys::CanvasRenderingContext2d {
-    canvas
+  pub fn context() -> web_sys::CanvasRenderingContext2d {
+    canvas()
       .get_context("2d")
       .unwrap()
       .unwrap()
@@ -89,8 +88,8 @@ pub mod playground {
   }
 
   pub fn clear_screen() {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let canvas = canvas();
+    let context = context();
     context.save();
     context.reset_transform().unwrap();
     context.clear_rect(0., 0., canvas.width() as f64, canvas.height() as f64);
@@ -108,8 +107,7 @@ pub mod playground {
 
   pub fn inv_canvas_position(x: i32, y: i32) -> (f64, f64) {
     let ratio = get_device_pixel_ratio();
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let context = context();
     let transform = &context.get_transform().unwrap();
     let inv = transform.inverse();
     let mut pt = web_sys::DomPointInit::new();
@@ -121,7 +119,7 @@ pub mod playground {
 
   pub fn from_pixels(pixels: u32) -> f64 {
     let (vw, vh) = get_viewport();
-    let canvas = get_canvas();
+    let canvas = canvas();
     let ratio = get_device_pixel_ratio();
     if vw < vh {
       (vw / canvas.width() as f64) * pixels as f64 * ratio
@@ -130,8 +128,8 @@ pub mod playground {
     }
   }
   pub fn get_viewport() -> (f64, f64) {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let canvas = canvas();
+    let context = context();
     let transform = context.get_transform().unwrap();
     let scale = transform.a();
     // let ratio = get_device_pixel_ratio();
@@ -142,8 +140,8 @@ pub mod playground {
   }
   pub fn set_viewport(width: f64, height: f64) {
     let pixel_ratio = get_device_pixel_ratio();
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let canvas = canvas();
+    let context = context();
 
     context.reset_transform().unwrap();
 
@@ -165,8 +163,7 @@ pub mod playground {
   }
 
   pub fn render_polygon(poly: &Polygon<BigRational>) {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let context = context();
 
     context.begin_path();
     context.set_line_join("round");
@@ -186,8 +183,7 @@ pub mod playground {
   }
 
   pub fn render_line(pts: &[Point<BigRational, 2>]) {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let context = context();
 
     context.begin_path();
     context.set_line_join("round");
@@ -222,24 +218,45 @@ pub mod playground {
     path
   }
 
+  pub fn at_point<F: FnOnce()>(pt: &Point<BigRational, 2>, cb: F) {
+    let pt: Point<f64, 2> = pt.into();
+    let context = context();
+    context.save();
+    context.translate(*pt.x_coord(), *pt.y_coord()).unwrap();
+    cb();
+    context.restore();
+  }
+
+  pub fn circle(radius: u32) -> Path2d {
+    let path = Path2d::new().unwrap();
+    path
+      .arc(
+        0.0,
+        0.0,
+        from_pixels(radius), // radius
+        0.0,
+        std::f64::consts::PI * 2.,
+      )
+      .unwrap();
+    path
+  }
+
   pub fn render_point(pt: &Point<BigRational, 2>) {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let context = context();
 
     let path = point_path_2d(pt, 1.0);
 
-    context.set_fill_style(&JsValue::from_str("green"));
+    context.set_fill_style(&"green".into());
     context.fill_with_path_2d(&path);
     context.stroke_with_path(&path);
   }
 
   pub fn render_fixed_point(pt: &Point<BigRational, 2>) {
-    let canvas = get_canvas();
-    let context = get_context_2d(&canvas);
+    let context = context();
 
     let path = point_path_2d(pt, 0.5);
 
-    context.set_fill_style(&JsValue::from_str("grey"));
+    context.set_fill_style(&"grey".into());
     context.stroke_with_path(&path);
     context.fill_with_path_2d(&path);
   }
@@ -247,6 +264,7 @@ pub mod playground {
   pub fn with_points(n: usize) -> Vec<Point<BigRational, 2>> {
     with_points_from(n, vec![])
   }
+
   pub fn with_points_from(
     n: usize,
     mut original_pts: Vec<Point<BigRational, 2>>,
@@ -257,8 +275,6 @@ pub mod playground {
     static START: Once = Once::new();
 
     START.call_once(|| {
-      log("Installing handlers.");
-
       {
         let mut pts = POINTS.lock().unwrap();
         let mut rng = rand::thread_rng();
@@ -276,8 +292,7 @@ pub mod playground {
       let handle_select = || {
         let (x, y) = absolute_mouse_position();
         let ratio = get_device_pixel_ratio();
-        let canvas = get_canvas();
-        let context = get_context_2d(&canvas);
+        let context = context();
         let pts = POINTS.lock().unwrap();
 
         for (i, pt) in pts.deref().iter().enumerate() {
@@ -363,7 +378,7 @@ pub mod playground {
   where
     F: Fn() + 'static,
   {
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new(&canvas, "click", move |_event| callback());
     listener.forget();
   }
@@ -372,7 +387,7 @@ pub mod playground {
   where
     F: Fn(&web_sys::MouseEvent) + 'static,
   {
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new(&canvas, "mousemove", move |event| {
       let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
       callback(event)
@@ -383,7 +398,7 @@ pub mod playground {
   where
     F: Fn(&web_sys::MouseEvent) + 'static,
   {
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new(&canvas, "mousedown", move |event| {
       let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
       callback(event)
@@ -394,7 +409,7 @@ pub mod playground {
   where
     F: Fn(&web_sys::MouseEvent) + 'static,
   {
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new(&canvas, "mouseup", move |event| {
       let event = event.dyn_ref::<web_sys::MouseEvent>().unwrap_throw();
       callback(event)
@@ -407,7 +422,7 @@ pub mod playground {
     F: Fn(&web_sys::TouchEvent) + 'static,
   {
     let options = EventListenerOptions::enable_prevent_default();
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new_with_options(&canvas, "touchstart", options, move |event| {
       let event = event.dyn_ref::<web_sys::TouchEvent>().unwrap_throw();
       callback(event)
@@ -420,7 +435,7 @@ pub mod playground {
     F: Fn(&web_sys::TouchEvent) + 'static,
   {
     let options = EventListenerOptions::enable_prevent_default();
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new_with_options(&canvas, "touchend", options, move |event| {
       let event = event.dyn_ref::<web_sys::TouchEvent>().unwrap_throw();
       callback(event)
@@ -433,7 +448,7 @@ pub mod playground {
     F: Fn(&web_sys::TouchEvent) + 'static,
   {
     let options = EventListenerOptions::enable_prevent_default();
-    let canvas = super::playground::get_canvas();
+    let canvas = super::playground::canvas();
     let listener = EventListener::new_with_options(&canvas, "touchmove", options, move |event| {
       let event = event.dyn_ref::<web_sys::TouchEvent>().unwrap_throw();
       callback(event)
