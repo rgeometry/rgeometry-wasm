@@ -1,12 +1,5 @@
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::*;
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-  #[wasm_bindgen(js_namespace = console)]
-  fn log(s: &str);
-}
 
 // mod timer {
 //   pub struct Timer {
