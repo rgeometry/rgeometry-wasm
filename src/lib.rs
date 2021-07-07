@@ -173,6 +173,7 @@ pub mod playground {
       }
     }
     context.close_path();
+    context.fill();
     context.stroke();
   }
 
