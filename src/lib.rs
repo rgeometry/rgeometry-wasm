@@ -544,7 +544,7 @@ pub mod playground {
       line_to(*pt.x_coord(), *pt.y_coord())
     }
 
-    pub fn set_line_dash(dash: &[i32]) {
+    pub fn set_line_dash(dash: &[f64]) {
       let arr = Array::new();
       for (nth, &dash_len) in dash.iter().enumerate() {
         arr.set(nth as u32, dash_len.into());
