@@ -44,6 +44,7 @@ pub mod playground {
   use web_sys::Path2d;
 
   use once_cell::sync::Lazy;
+  use once_cell::sync::OnceCell;
   use std::sync::Mutex;
 
   pub fn upd_mouse(event: &web_sys::MouseEvent) {
@@ -349,23 +350,27 @@ pub mod playground {
   }
 
   pub fn with_polygon(n: usize) -> Polygon<BigRational> {
-    static POLYGON: Lazy<Mutex<Option<Polygon<BigRational>>>> = Lazy::new(|| Mutex::new(None));
-    let pts = with_points(n);
-    let mut data = POLYGON.lock().unwrap();
-    match (*data).as_mut() {
-      None => {
+    get_polygon(n)
+  }
+
+  pub fn get_polygon(n: usize) -> Polygon<BigRational> {
+    static POLYGON: OnceCell<Mutex<Polygon<BigRational>>> = OnceCell::new();
+    let mut p = POLYGON
+      .get_or_init(|| {
+        let pts = with_points(n);
         let p = two_opt_moves(pts, &mut rand::thread_rng()).unwrap();
-        *data = Some(p.clone());
-        p
-      }
-      Some(p) => {
-        for (idx, pt) in p.iter_mut().enumerate() {
-          *pt = pts[idx].clone();
-        }
-        resolve_self_intersections(p, &mut rand::thread_rng()).unwrap();
-        p.clone()
-      }
+        Mutex::new(p)
+      })
+      .lock()
+      .unwrap();
+
+    let pts = with_points(n);
+
+    for (idx, pt) in p.iter_mut().enumerate() {
+      *pt = pts[idx].clone();
     }
+    resolve_self_intersections(&mut p, &mut rand::thread_rng()).unwrap();
+    p.clone()
   }
 
   pub fn on_canvas_click<F>(callback: F)
