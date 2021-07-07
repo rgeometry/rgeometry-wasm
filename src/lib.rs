@@ -235,23 +235,19 @@ pub mod playground {
   }
 
   pub fn render_point(pt: &Point<BigRational, 2>) {
-    let context = context();
-
     let path = point_path_2d(pt, 1.0);
 
-    context.set_fill_style(&"green".into());
-    context.fill_with_path_2d(&path);
-    context.stroke_with_path(&path);
+    set_fill_style("green");
+    fill_with_path_2d(&path);
+    stroke_with_path(&path);
   }
 
   pub fn render_fixed_point(pt: &Point<BigRational, 2>) {
-    let context = context();
-
     let path = point_path_2d(pt, 0.5);
 
-    context.set_fill_style(&"grey".into());
-    context.stroke_with_path(&path);
-    context.fill_with_path_2d(&path);
+    set_fill_style("grey");
+    stroke_with_path(&path);
+    fill_with_path_2d(&path);
   }
 
   pub fn get_points(n: usize) -> Vec<Point<BigRational, 2>> {
@@ -456,6 +452,7 @@ pub mod playground {
 
   mod context {
     use super::{context, from_pixels};
+    use web_sys::Path2d;
 
     pub fn set_font(font: &str) {
       context().set_font(font)
@@ -499,6 +496,14 @@ pub mod playground {
       context().scale(factor, -factor).unwrap();
       context().stroke_text(text, 0.0, 0.0).unwrap();
       context().restore();
+    }
+
+    pub fn fill_with_path_2d(path: &Path2d) {
+      context().fill_with_path_2d(path)
+    }
+
+    pub fn stroke_with_path(path: &Path2d) {
+      context().stroke_with_path(path)
     }
   }
   pub use context::*;
