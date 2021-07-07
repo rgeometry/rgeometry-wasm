@@ -26,16 +26,14 @@ fn set_mouse(x: i32, y: i32) {
 }
 
 pub mod playground {
-  use num::BigRational;
   use rgeometry::algorithms::polygonization::*;
   use rgeometry::data::*;
 
   use gloo_events::{EventListener, EventListenerOptions};
-  use num::*;
+  use ordered_float::OrderedFloat;
   use rand::distributions::Standard;
   // use rand::distributions::Uniform;
   use rand::Rng;
-  use std::convert::*;
   use std::ops::Deref;
   // use std::ops::DerefMut;
   use std::ops::Index;
@@ -46,6 +44,8 @@ pub mod playground {
   use once_cell::sync::Lazy;
   use once_cell::sync::OnceCell;
   use std::sync::Mutex;
+
+  pub type Num = OrderedFloat<f64>;
 
   pub fn upd_mouse(event: &web_sys::MouseEvent) {
     super::set_mouse(event.offset_x(), event.offset_y())
@@ -156,20 +156,18 @@ pub mod playground {
     context.set_line_width(2. / ratio * pixel_ratio);
   }
 
-  pub fn render_polygon(poly: &Polygon<BigRational>) {
+  pub fn render_polygon(poly: &Polygon<Num>) {
     let context = context();
 
     context.begin_path();
     context.set_line_join("round");
-    let mut iter = poly
-      .iter_boundary()
-      .map(|pt| pt.point().cast(|v| BigRational::to_f64(&v).unwrap()));
+    let mut iter = poly.iter_boundary().map(|pt| pt.point());
     if let Some(origin) = iter.next() {
       let [x, y] = origin.array;
-      context.move_to(x, y);
+      context.move_to(*x, *y);
       for pt in iter {
         let [x2, y2] = pt.array;
-        context.line_to(x2, y2);
+        context.line_to(*x2, *y2);
       }
     }
     context.close_path();
@@ -177,34 +175,29 @@ pub mod playground {
     context.stroke();
   }
 
-  pub fn render_line(pts: &[Point<BigRational, 2>]) {
+  pub fn render_line(pts: &[Point<Num, 2>]) {
     let context = context();
 
     context.begin_path();
     context.set_line_join("round");
-    let mut iter = pts.iter().map(|pt| {
-      let pt: Point<f64, 2> = pt.try_into().unwrap();
-      pt
-    });
+    let mut iter = pts.iter();
     if let Some(origin) = iter.next() {
       let [x, y] = origin.array;
-      context.move_to(x, y);
+      context.move_to(*x, *y);
       for pt in iter {
         let [x2, y2] = pt.array;
-        context.line_to(x2, y2);
+        context.line_to(*x2, *y2);
       }
     }
     context.stroke();
   }
 
-  pub fn point_path_2d(pt: &Point<BigRational, 2>, scale: f64) -> Path2d {
-    let pt: Point<f64, 2> = pt.into();
-
+  pub fn point_path_2d(pt: &Point<Num, 2>, scale: f64) -> Path2d {
     let path = Path2d::new().unwrap();
     path
       .arc(
-        *pt.x_coord(),
-        *pt.y_coord(),
+        **pt.x_coord(),
+        **pt.y_coord(),
         scale * from_pixels(15), // radius
         0.0,
         std::f64::consts::PI * 2.,
@@ -213,11 +206,10 @@ pub mod playground {
     path
   }
 
-  pub fn at_point<F: FnOnce()>(pt: &Point<BigRational, 2>, cb: F) {
-    let pt: Point<f64, 2> = pt.into();
+  pub fn at_point<F: FnOnce()>(pt: &Point<Num, 2>, cb: F) {
     let context = context();
     context.save();
-    context.translate(*pt.x_coord(), *pt.y_coord()).unwrap();
+    context.translate(**pt.x_coord(), **pt.y_coord()).unwrap();
     cb();
     context.restore();
   }
@@ -236,7 +228,7 @@ pub mod playground {
     path
   }
 
-  pub fn render_point(pt: &Point<BigRational, 2>) {
+  pub fn render_point(pt: &Point<Num, 2>) {
     let path = point_path_2d(pt, 1.0);
 
     set_fill_style("green");
@@ -244,7 +236,7 @@ pub mod playground {
     stroke_with_path(&path);
   }
 
-  pub fn render_fixed_point(pt: &Point<BigRational, 2>) {
+  pub fn render_fixed_point(pt: &Point<Num, 2>) {
     let path = point_path_2d(pt, 0.5);
 
     set_fill_style("grey");
@@ -252,21 +244,14 @@ pub mod playground {
     fill_with_path_2d(&path);
   }
 
-  pub fn get_points(n: usize) -> Vec<Point<BigRational, 2>> {
-    with_points(n)
-  }
-
   // #[deprecated(since = "0.1.0", note = "Please use the get_points function instead")]
-  pub fn with_points(n: usize) -> Vec<Point<BigRational, 2>> {
-    with_points_from(n, vec![])
+  pub fn with_points(n: usize) -> Vec<Point<Num, 2>> {
+    get_points(n)
   }
 
-  pub fn with_points_from(
-    n: usize,
-    mut original_pts: Vec<Point<BigRational, 2>>,
-  ) -> Vec<Point<BigRational, 2>> {
+  pub fn get_points(n: usize) -> Vec<Point<Num, 2>> {
     static SELECTED: Lazy<Mutex<Option<(usize, i32, i32)>>> = Lazy::new(|| Mutex::new(None));
-    static POINTS: Lazy<Mutex<Vec<Point<BigRational, 2>>>> = Lazy::new(|| Mutex::new(vec![]));
+    static POINTS: Lazy<Mutex<Vec<Point<Num, 2>>>> = Lazy::new(|| Mutex::new(vec![]));
 
     static START: Once = Once::new();
 
@@ -274,14 +259,16 @@ pub mod playground {
       {
         let mut pts = POINTS.lock().unwrap();
         let mut rng = rand::thread_rng();
-        pts.append(&mut original_pts);
         let (width, height) = get_viewport();
-        let t = Transform::scale(Vector([width * 0.8, height * 0.8]))
-          * Transform::translate(Vector([-0.5, -0.5]));
+        let t = Transform::scale(Vector([
+          OrderedFloat(width * 0.8),
+          OrderedFloat(height * 0.8),
+        ]))
+          * Transform::translate(Vector([OrderedFloat(-0.5), OrderedFloat(-0.5)]));
         while pts.len() < n {
-          let pt: Point<f64, 2> = rng.sample(Standard);
+          let pt: Point<Num, 2> = rng.sample(Standard);
           let pt = &t * pt;
-          pts.push(pt.try_into().unwrap())
+          pts.push(pt)
         }
       }
 
@@ -292,7 +279,6 @@ pub mod playground {
         let pts = POINTS.lock().unwrap();
 
         for (i, pt) in pts.deref().iter().enumerate() {
-          // let pt: &Point<BigRational, 2> = &pt;
           let path = point_path_2d(pt, 1.0);
           let in_path = context.is_point_in_path_with_path_2d_and_f64(
             &path,
@@ -342,7 +328,7 @@ pub mod playground {
 
         let mut pts = POINTS.lock().unwrap();
         let pt = pts.index(i);
-        let vector: Vector<BigRational, 2> = Vector([dx, dy]).try_into().unwrap();
+        let vector: Vector<Num, 2> = Vector([OrderedFloat(dx), OrderedFloat(dy)]);
         pts[i] = pt + &vector;
       }
     }
@@ -350,12 +336,12 @@ pub mod playground {
     POINTS.lock().unwrap().clone()
   }
 
-  pub fn with_polygon(n: usize) -> Polygon<BigRational> {
+  pub fn with_polygon(n: usize) -> Polygon<Num> {
     get_polygon(n)
   }
 
-  pub fn get_polygon(n: usize) -> Polygon<BigRational> {
-    static POLYGON: OnceCell<Mutex<Polygon<BigRational>>> = OnceCell::new();
+  pub fn get_polygon(n: usize) -> Polygon<Num> {
+    static POLYGON: OnceCell<Mutex<Polygon<Num>>> = OnceCell::new();
     let mut p = POLYGON
       .get_or_init(|| {
         let pts = with_points(n);
@@ -457,9 +443,8 @@ pub mod playground {
   }
 
   mod context {
-    use super::{context, from_pixels};
+    use super::{context, from_pixels, Num};
     use js_sys::Array;
-    use num::BigRational;
     use rgeometry::data::*;
     use web_sys::Path2d;
 
@@ -531,18 +516,16 @@ pub mod playground {
       context().move_to(x, y)
     }
 
-    pub fn move_to_point(pt: &Point<BigRational, 2>) {
-      let pt: Point<f64, 2> = pt.into();
-      move_to(*pt.x_coord(), *pt.y_coord())
+    pub fn move_to_point(pt: &Point<Num, 2>) {
+      move_to(**pt.x_coord(), **pt.y_coord())
     }
 
     pub fn line_to(x: f64, y: f64) {
       context().line_to(x, y)
     }
 
-    pub fn line_to_point(pt: &Point<BigRational, 2>) {
-      let pt: Point<f64, 2> = pt.into();
-      line_to(*pt.x_coord(), *pt.y_coord())
+    pub fn line_to_point(pt: &Point<Num, 2>) {
+      line_to(**pt.x_coord(), **pt.y_coord())
     }
 
     pub fn set_line_dash(dash: &[f64]) {
