@@ -457,6 +457,8 @@ pub mod playground {
 
   mod context {
     use super::{context, from_pixels};
+    use num::BigRational;
+    use rgeometry::data::*;
     use web_sys::Path2d;
 
     pub fn set_font(font: &str) {
@@ -509,6 +511,36 @@ pub mod playground {
 
     pub fn stroke_with_path(path: &Path2d) {
       context().stroke_with_path(path)
+    }
+
+    pub fn begin_path() {
+      context().begin_path();
+    }
+
+    pub fn close_path() {
+      context().close_path();
+    }
+
+    pub fn set_line_join(join: &str) {
+      context().set_line_join(join)
+    }
+
+    pub fn move_to(x: f64, y: f64) {
+      context().move_to(x, y)
+    }
+
+    pub fn move_to_point(pt: &Point<BigRational, 2>) {
+      let pt: Point<f64, 2> = pt.into();
+      move_to(*pt.x_coord(), *pt.y_coord())
+    }
+
+    pub fn line_to(x: f64, y: f64) {
+      context().line_to(x, y)
+    }
+
+    pub fn line_to_point(pt: &Point<BigRational, 2>) {
+      let pt: Point<f64, 2> = pt.into();
+      line_to(*pt.x_coord(), *pt.y_coord())
     }
   }
   pub use context::*;
