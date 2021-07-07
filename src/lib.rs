@@ -457,6 +457,7 @@ pub mod playground {
 
   mod context {
     use super::{context, from_pixels};
+    use js_sys::Array;
     use num::BigRational;
     use rgeometry::data::*;
     use web_sys::Path2d;
@@ -541,6 +542,14 @@ pub mod playground {
     pub fn line_to_point(pt: &Point<BigRational, 2>) {
       let pt: Point<f64, 2> = pt.into();
       line_to(*pt.x_coord(), *pt.y_coord())
+    }
+
+    pub fn set_line_dash(dash: &[i32]) {
+      let arr = Array::new();
+      for (nth, &dash_len) in dash.iter().enumerate() {
+        arr.set(nth as u32, dash_len.into());
+      }
+      context().set_line_dash(arr.as_ref()).unwrap()
     }
   }
   pub use context::*;
