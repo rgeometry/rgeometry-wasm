@@ -36,4 +36,5 @@ features = [
   'TouchEvent',
   'TouchList',
   'Window',
+  'CssStyleDeclaration',
 ]
