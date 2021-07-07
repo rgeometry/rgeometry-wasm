@@ -541,23 +541,6 @@
 <span id="538">538</span>
 <span id="539">539</span>
 <span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std::sync::atomic::AtomicI32</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic::Ordering</span>::<span class="kw-2">*</span>;
@@ -587,16 +570,14 @@
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">playground</span> {
-  <span class="kw">use</span> <span class="ident">num::BigRational</span>;
   <span class="kw">use</span> <span class="ident">rgeometry::algorithms::polygonization</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">rgeometry::data</span>::<span class="kw-2">*</span>;
 
   <span class="kw">use</span> <span class="ident">gloo_events</span>::{<span class="ident">EventListener</span>, <span class="ident">EventListenerOptions</span>};
-  <span class="kw">use</span> <span class="ident">num</span>::<span class="kw-2">*</span>;
+  <span class="kw">use</span> <span class="ident">ordered_float::OrderedFloat</span>;
   <span class="kw">use</span> <span class="ident">rand::distributions::Standard</span>;
   <span class="comment">// use rand::distributions::Uniform;</span>
   <span class="kw">use</span> <span class="ident">rand::Rng</span>;
-  <span class="kw">use</span> <span class="ident">std::convert</span>::<span class="kw-2">*</span>;
   <span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
   <span class="comment">// use std::ops::DerefMut;</span>
   <span class="kw">use</span> <span class="ident">std::ops::Index</span>;
@@ -607,6 +588,8 @@
   <span class="kw">use</span> <span class="ident">once_cell::sync::Lazy</span>;
   <span class="kw">use</span> <span class="ident">once_cell::sync::OnceCell</span>;
   <span class="kw">use</span> <span class="ident">std::sync::Mutex</span>;
+
+  <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Num</span> <span class="op">=</span> <span class="ident">OrderedFloat</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
 
   <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upd_mouse</span>(<span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">web_sys::MouseEvent</span>) {
     <span class="kw">super</span><span class="ident">::set_mouse</span>(<span class="ident">event</span>.<span class="ident">offset_x</span>(), <span class="ident">event</span>.<span class="ident">offset_y</span>())
@@ -717,20 +700,18 @@
     <span class="ident">context</span>.<span class="ident">set_line_width</span>(<span class="number">2.</span> <span class="op">/</span> <span class="ident">ratio</span> <span class="op">*</span> <span class="ident">pixel_ratio</span>);
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_polygon</span>(<span class="ident">poly</span>: <span class="kw-2">&amp;</span><span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">BigRational</span><span class="op">&gt;</span>) {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_polygon</span>(<span class="ident">poly</span>: <span class="kw-2">&amp;</span><span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span>) {
     <span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">context</span>();
 
     <span class="ident">context</span>.<span class="ident">begin_path</span>();
     <span class="ident">context</span>.<span class="ident">set_line_join</span>(<span class="string">&quot;round&quot;</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">poly</span>
-      .<span class="ident">iter_boundary</span>()
-      .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pt</span><span class="op">|</span> <span class="ident">pt</span>.<span class="ident">point</span>().<span class="ident">cast</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">BigRational::to_f64</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>).<span class="ident">unwrap</span>()));
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">poly</span>.<span class="ident">iter_boundary</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pt</span><span class="op">|</span> <span class="ident">pt</span>.<span class="ident">point</span>());
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">origin</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>() {
       <span class="kw">let</span> [<span class="ident">x</span>, <span class="ident">y</span>] <span class="op">=</span> <span class="ident">origin</span>.<span class="ident">array</span>;
-      <span class="ident">context</span>.<span class="ident">move_to</span>(<span class="ident">x</span>, <span class="ident">y</span>);
+      <span class="ident">context</span>.<span class="ident">move_to</span>(<span class="kw-2">*</span><span class="ident">x</span>, <span class="kw-2">*</span><span class="ident">y</span>);
       <span class="kw">for</span> <span class="ident">pt</span> <span class="kw">in</span> <span class="ident">iter</span> {
         <span class="kw">let</span> [<span class="ident">x2</span>, <span class="ident">y2</span>] <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">array</span>;
-        <span class="ident">context</span>.<span class="ident">line_to</span>(<span class="ident">x2</span>, <span class="ident">y2</span>);
+        <span class="ident">context</span>.<span class="ident">line_to</span>(<span class="kw-2">*</span><span class="ident">x2</span>, <span class="kw-2">*</span><span class="ident">y2</span>);
       }
     }
     <span class="ident">context</span>.<span class="ident">close_path</span>();
@@ -738,34 +719,29 @@
     <span class="ident">context</span>.<span class="ident">stroke</span>();
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_line</span>(<span class="ident">pts</span>: <span class="kw-2">&amp;</span>[<span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>]) {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_line</span>(<span class="ident">pts</span>: <span class="kw-2">&amp;</span>[<span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>]) {
     <span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">context</span>();
 
     <span class="ident">context</span>.<span class="ident">begin_path</span>();
     <span class="ident">context</span>.<span class="ident">set_line_join</span>(<span class="string">&quot;round&quot;</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">pts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pt</span><span class="op">|</span> {
-      <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
-      <span class="ident">pt</span>
-    });
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">pts</span>.<span class="ident">iter</span>();
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">origin</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>() {
       <span class="kw">let</span> [<span class="ident">x</span>, <span class="ident">y</span>] <span class="op">=</span> <span class="ident">origin</span>.<span class="ident">array</span>;
-      <span class="ident">context</span>.<span class="ident">move_to</span>(<span class="ident">x</span>, <span class="ident">y</span>);
+      <span class="ident">context</span>.<span class="ident">move_to</span>(<span class="kw-2">*</span><span class="ident">x</span>, <span class="kw-2">*</span><span class="ident">y</span>);
       <span class="kw">for</span> <span class="ident">pt</span> <span class="kw">in</span> <span class="ident">iter</span> {
         <span class="kw">let</span> [<span class="ident">x2</span>, <span class="ident">y2</span>] <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">array</span>;
-        <span class="ident">context</span>.<span class="ident">line_to</span>(<span class="ident">x2</span>, <span class="ident">y2</span>);
+        <span class="ident">context</span>.<span class="ident">line_to</span>(<span class="kw-2">*</span><span class="ident">x2</span>, <span class="kw-2">*</span><span class="ident">y2</span>);
       }
     }
     <span class="ident">context</span>.<span class="ident">stroke</span>();
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">scale</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Path2d</span> {
-    <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">into</span>();
-
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">scale</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Path2d</span> {
     <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Path2d::new</span>().<span class="ident">unwrap</span>();
     <span class="ident">path</span>
       .<span class="ident">arc</span>(
-        <span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(),
-        <span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>(),
+        <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(),
+        <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>(),
         <span class="ident">scale</span> <span class="op">*</span> <span class="ident">from_pixels</span>(<span class="number">15</span>), <span class="comment">// radius</span>
         <span class="number">0.0</span>,
         <span class="ident">std::f64::consts::PI</span> <span class="op">*</span> <span class="number">2.</span>,
@@ -774,11 +750,10 @@
     <span class="ident">path</span>
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_point</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnOnce</span>()<span class="op">&gt;</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">cb</span>: <span class="ident">F</span>) {
-    <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">into</span>();
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_point</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnOnce</span>()<span class="op">&gt;</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">cb</span>: <span class="ident">F</span>) {
     <span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">context</span>();
     <span class="ident">context</span>.<span class="ident">save</span>();
-    <span class="ident">context</span>.<span class="ident">translate</span>(<span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(), <span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>()).<span class="ident">unwrap</span>();
+    <span class="ident">context</span>.<span class="ident">translate</span>(<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(), <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>()).<span class="ident">unwrap</span>();
     <span class="ident">cb</span>();
     <span class="ident">context</span>.<span class="ident">restore</span>();
   }
@@ -797,7 +772,7 @@
     <span class="ident">path</span>
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>) {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>) {
     <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>, <span class="number">1.0</span>);
 
     <span class="ident">set_fill_style</span>(<span class="string">&quot;green&quot;</span>);
@@ -805,7 +780,7 @@
     <span class="ident">stroke_with_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>);
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_fixed_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>) {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_fixed_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>) {
     <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>, <span class="number">0.5</span>);
 
     <span class="ident">set_fill_style</span>(<span class="string">&quot;grey&quot;</span>);
@@ -813,21 +788,14 @@
     <span class="ident">fill_with_path_2d</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>);
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_points</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="ident">with_points</span>(<span class="ident">n</span>)
-  }
-
   <span class="comment">// #[deprecated(since = &quot;0.1.0&quot;, note = &quot;Please use the get_points function instead&quot;)]</span>
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_points</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="ident">with_points_from</span>(<span class="ident">n</span>, <span class="macro">vec!</span>[])
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_points</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="ident">get_points</span>(<span class="ident">n</span>)
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_points_from</span>(
-    <span class="ident">n</span>: <span class="ident">usize</span>,
-    <span class="kw-2">mut</span> <span class="ident">original_pts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-  ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_points</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">static</span> <span class="ident">SELECTED</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">i32</span>, <span class="ident">i32</span>)<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Mutex::new</span>(<span class="prelude-val">None</span>));
-    <span class="kw">static</span> <span class="ident">POINTS</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Mutex::new</span>(<span class="macro">vec!</span>[]));
+    <span class="kw">static</span> <span class="ident">POINTS</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Mutex::new</span>(<span class="macro">vec!</span>[]));
 
     <span class="kw">static</span> <span class="ident">START</span>: <span class="ident">Once</span> <span class="op">=</span> <span class="ident">Once::new</span>();
 
@@ -835,14 +803,16 @@
       {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand::thread_rng</span>();
-        <span class="ident">pts</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">original_pts</span>);
         <span class="kw">let</span> (<span class="ident">width</span>, <span class="ident">height</span>) <span class="op">=</span> <span class="ident">get_viewport</span>();
-        <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">Transform::scale</span>(<span class="ident">Vector</span>([<span class="ident">width</span> <span class="op">*</span> <span class="number">0.8</span>, <span class="ident">height</span> <span class="op">*</span> <span class="number">0.8</span>]))
-          <span class="op">*</span> <span class="ident">Transform::translate</span>(<span class="ident">Vector</span>([<span class="op">-</span><span class="number">0.5</span>, <span class="op">-</span><span class="number">0.5</span>]));
+        <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">Transform::scale</span>(<span class="ident">Vector</span>([
+          <span class="ident">OrderedFloat</span>(<span class="ident">width</span> <span class="op">*</span> <span class="number">0.8</span>),
+          <span class="ident">OrderedFloat</span>(<span class="ident">height</span> <span class="op">*</span> <span class="number">0.8</span>),
+        ]))
+          <span class="op">*</span> <span class="ident">Transform::translate</span>(<span class="ident">Vector</span>([<span class="ident">OrderedFloat</span>(<span class="op">-</span><span class="number">0.5</span>), <span class="ident">OrderedFloat</span>(<span class="op">-</span><span class="number">0.5</span>)]));
         <span class="kw">while</span> <span class="ident">pts</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">n</span> {
-          <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">rng</span>.<span class="ident">sample</span>(<span class="ident">Standard</span>);
+          <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">rng</span>.<span class="ident">sample</span>(<span class="ident">Standard</span>);
           <span class="kw">let</span> <span class="ident">pt</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t</span> <span class="op">*</span> <span class="ident">pt</span>;
-          <span class="ident">pts</span>.<span class="ident">push</span>(<span class="ident">pt</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
+          <span class="ident">pts</span>.<span class="ident">push</span>(<span class="ident">pt</span>)
         }
       }
 
@@ -853,7 +823,6 @@
         <span class="kw">let</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
 
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">pt</span>) <span class="kw">in</span> <span class="ident">pts</span>.<span class="ident">deref</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-          <span class="comment">// let pt: &amp;Point&lt;BigRational, 2&gt; = &amp;pt;</span>
           <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">point_path_2d</span>(<span class="ident">pt</span>, <span class="number">1.0</span>);
           <span class="kw">let</span> <span class="ident">in_path</span> <span class="op">=</span> <span class="ident">context</span>.<span class="ident">is_point_in_path_with_path_2d_and_f64</span>(
             <span class="kw-2">&amp;</span><span class="ident">path</span>,
@@ -903,7 +872,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">pt</span> <span class="op">=</span> <span class="ident">pts</span>.<span class="ident">index</span>(<span class="ident">i</span>);
-        <span class="kw">let</span> <span class="ident">vector</span>: <span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vector</span>([<span class="ident">dx</span>, <span class="ident">dy</span>]).<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">vector</span>: <span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vector</span>([<span class="ident">OrderedFloat</span>(<span class="ident">dx</span>), <span class="ident">OrderedFloat</span>(<span class="ident">dy</span>)]);
         <span class="ident">pts</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">pt</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">vector</span>;
       }
     }
@@ -911,12 +880,12 @@
     <span class="ident">POINTS</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>()
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_polygon</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">BigRational</span><span class="op">&gt;</span> {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_polygon</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span> {
     <span class="ident">get_polygon</span>(<span class="ident">n</span>)
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_polygon</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">BigRational</span><span class="op">&gt;</span> {
-    <span class="kw">static</span> <span class="ident">POLYGON</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">BigRational</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_polygon</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span> {
+    <span class="kw">static</span> <span class="ident">POLYGON</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Polygon</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">POLYGON</span>
       .<span class="ident">get_or_init</span>(<span class="op">|</span><span class="op">|</span> {
         <span class="kw">let</span> <span class="ident">pts</span> <span class="op">=</span> <span class="ident">with_points</span>(<span class="ident">n</span>);
@@ -1018,9 +987,8 @@
   }
 
   <span class="kw">mod</span> <span class="ident">context</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">context</span>, <span class="ident">from_pixels</span>};
+    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">context</span>, <span class="ident">from_pixels</span>, <span class="ident">Num</span>};
     <span class="kw">use</span> <span class="ident">js_sys::Array</span>;
-    <span class="kw">use</span> <span class="ident">num::BigRational</span>;
     <span class="kw">use</span> <span class="ident">rgeometry::data</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">web_sys::Path2d</span>;
 
@@ -1092,18 +1060,16 @@
       <span class="ident">context</span>().<span class="ident">move_to</span>(<span class="ident">x</span>, <span class="ident">y</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">move_to_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>) {
-      <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">into</span>();
-      <span class="ident">move_to</span>(<span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(), <span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">move_to_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>) {
+      <span class="ident">move_to</span>(<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(), <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>())
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">line_to</span>(<span class="ident">x</span>: <span class="ident">f64</span>, <span class="ident">y</span>: <span class="ident">f64</span>) {
       <span class="ident">context</span>().<span class="ident">line_to</span>(<span class="ident">x</span>, <span class="ident">y</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">line_to_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">BigRational</span>, <span class="number">2</span><span class="op">&gt;</span>) {
-      <span class="kw">let</span> <span class="ident">pt</span>: <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="number">2</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">pt</span>.<span class="ident">into</span>();
-      <span class="ident">line_to</span>(<span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(), <span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">line_to_point</span>(<span class="ident">pt</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">Num</span>, <span class="number">2</span><span class="op">&gt;</span>) {
+      <span class="ident">line_to</span>(<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">x_coord</span>(), <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">pt</span>.<span class="ident">y_coord</span>())
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_line_dash</span>(<span class="ident">dash</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
