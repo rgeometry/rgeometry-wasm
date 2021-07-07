@@ -254,6 +254,11 @@ pub mod playground {
     context.fill_with_path_2d(&path);
   }
 
+  pub fn get_points(n: usize) -> Vec<Point<BigRational, 2>> {
+    with_points(n)
+  }
+
+  // #[deprecated(since = "0.1.0", note = "Please use the get_points function instead")]
   pub fn with_points(n: usize) -> Vec<Point<BigRational, 2>> {
     with_points_from(n, vec![])
   }
@@ -448,9 +453,53 @@ pub mod playground {
     });
     listener.forget();
   }
-  /*
-  polygon.scale_to_fit(width, height)
-  polygon.scale_to_fit_height(height)
-  polygon.scale_to_fit_width(width)
-  */
+
+  mod context {
+    use super::{context, from_pixels};
+
+    pub fn set_font(font: &str) {
+      context().set_font(font)
+    }
+
+    pub fn set_text_align(align: &str) {
+      context().set_text_align(align)
+    }
+
+    pub fn set_text_baseline(baseline: &str) {
+      context().set_text_baseline(baseline)
+    }
+
+    pub fn set_fill_style(style: &str) {
+      context().set_fill_style(&style.into())
+    }
+
+    pub fn set_stroke_style(style: &str) {
+      context().set_stroke_style(&style.into())
+    }
+
+    pub fn fill() {
+      context().fill()
+    }
+
+    pub fn stroke() {
+      context().stroke()
+    }
+
+    pub fn fill_text(text: &str) {
+      context().save();
+      let factor = from_pixels(1);
+      context().scale(factor, -factor).unwrap();
+      context().fill_text(text, 0.0, 0.0).unwrap();
+      context().restore();
+    }
+
+    pub fn stroke_text(text: &str) {
+      context().save();
+      let factor = from_pixels(1);
+      context().scale(factor, -factor).unwrap();
+      context().stroke_text(text, 0.0, 0.0).unwrap();
+      context().restore();
+    }
+  }
+  pub use context::*;
 }
