@@ -1,105 +1,107 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/rgeometry-26a631e95254b331/a01e0ee/src/orientation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>orientation.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../rgeometry/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/rgeometry-26a631e95254b331/19fde4d/src/orientation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>orientation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../rgeometry/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../rgeometry/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../rgeometry/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -432,14 +434,146 @@
 <span id="429">429</span>
 <span id="430">430</span>
 <span id="431">431</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">num_traits::Signed</span>;
-<span class="kw">use</span> <span class="ident">std::cmp::Ordering</span>;
-<span class="kw">use</span> <span class="ident">std::ops::Mul</span>;
-<span class="kw">use</span> <span class="ident">std::ops::Sub</span>;
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::cmp::Ordering</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data</span>::{<span class="ident">Point</span>, <span class="ident">Vector</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::Extended</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data::Vector</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::PolygonScalar</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Orientation</span> {
@@ -448,6 +582,15 @@
   <span class="ident">CoLinear</span>,
 }
 <span class="kw">use</span> <span class="ident">Orientation</span>::<span class="kw-2">*</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SoS</span> {
+  <span class="ident">CounterClockWise</span>,
+  <span class="ident">ClockWise</span>,
+}
+
+<span class="comment">// let slope1 = (2^q - 2^r) * (p - q);</span>
+<span class="comment">// let slope2 = (2^q - 2^p) * (r - q);</span>
 
 <span class="kw">impl</span> <span class="ident">Orientation</span> {
   <span class="doccomment">/// Determine the direction you have to turn if you walk from `p1`</span>
@@ -458,8 +601,8 @@
   <span class="doccomment">///</span>
   <span class="doccomment">/// # Polymorphism</span>
   <span class="doccomment">///</span>
-  <span class="doccomment">/// This function works with both [Points](Point) and [Vectors](Vector). You should prefer to</span>
-  <span class="doccomment">/// use [Point::orient] when possible.</span>
+  <span class="doccomment">/// This function works with both [Points](crate::data::Point) and [Vectors](Vector). You should prefer to</span>
+  <span class="doccomment">/// use [Point::orient](crate::data::Point::orient) when possible.</span>
   <span class="doccomment">///</span>
   <span class="doccomment">/// # Examples</span>
   <span class="doccomment">///</span>
@@ -476,15 +619,15 @@
   <span class="doccomment">/// assert!(Orientation::new(&amp;p1, &amp;p2, &amp;Point::new([ 1, 2 ])).is_cw());</span>
   <span class="doccomment">/// ```</span>
   <span class="doccomment">///</span>
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">p3</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Orientation</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">p3</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]) -&gt; <span class="ident">Orientation</span>
   <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Extended</span>,
+    <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
     <span class="comment">// raw_arr_turn(p, q, r)</span>
-    <span class="kw">match</span> <span class="ident">Extended::cmp_slope</span>(<span class="ident">p1</span>, <span class="ident">p2</span>, <span class="ident">p3</span>) {
-      <span class="ident">Ordering::Less</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::ClockWise</span>,
-      <span class="ident">Ordering::Equal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CoLinear</span>,
-      <span class="ident">Ordering::Greater</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CounterClockWise</span>,
+    <span class="kw">match</span> <span class="ident">T::cmp_slope</span>(<span class="ident">p1</span>, <span class="ident">p2</span>, <span class="ident">p3</span>) {
+      <span class="ident">Ordering::Less</span> =&gt; <span class="ident">Orientation::ClockWise</span>,
+      <span class="ident">Ordering::Equal</span> =&gt; <span class="ident">Orientation::CoLinear</span>,
+      <span class="ident">Ordering::Greater</span> =&gt; <span class="ident">Orientation::CounterClockWise</span>,
     }
   }
 
@@ -508,38 +651,62 @@
   <span class="doccomment">/// assert!(Orientation::along_vector(&amp;p1, &amp;v, &amp;Point::new([ 7, 8 ])).is_ccw());</span>
   <span class="doccomment">/// assert!(Orientation::along_vector(&amp;p1, &amp;v, &amp;Point::new([ 8, 7 ])).is_cw());</span>
   <span class="doccomment">/// ```</span>
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">along_vector</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">vector</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Orientation</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">along_vector</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">vector</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]) -&gt; <span class="ident">Orientation</span>
   <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Extended</span>,
+    <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
-    <span class="kw">match</span> <span class="ident">Extended::cmp_vector_slope</span>(<span class="kw-2">&amp;</span><span class="ident">vector</span>.<span class="number">0</span>, <span class="ident">p1</span>, <span class="ident">p2</span>) {
-      <span class="ident">Ordering::Less</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::ClockWise</span>,
-      <span class="ident">Ordering::Equal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CoLinear</span>,
-      <span class="ident">Ordering::Greater</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CounterClockWise</span>,
+    <span class="kw">match</span> <span class="ident">T::cmp_vector_slope</span>(<span class="kw-2">&amp;</span><span class="ident">vector</span>.<span class="number">0</span>, <span class="ident">p1</span>, <span class="ident">p2</span>) {
+      <span class="ident">Ordering::Less</span> =&gt; <span class="ident">Orientation::ClockWise</span>,
+      <span class="ident">Ordering::Equal</span> =&gt; <span class="ident">Orientation::CoLinear</span>,
+      <span class="ident">Ordering::Greater</span> =&gt; <span class="ident">Orientation::CounterClockWise</span>,
     }
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">along_perp_vector</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">vector</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Orientation</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">along_perp_vector</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>], <span class="ident">vector</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span>, <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]) -&gt; <span class="ident">Orientation</span>
   <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Extended</span>,
+    <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
-    <span class="kw">match</span> <span class="ident">Extended::cmp_perp_vector_slope</span>(<span class="kw-2">&amp;</span><span class="ident">vector</span>.<span class="number">0</span>, <span class="ident">p1</span>, <span class="ident">p2</span>) {
-      <span class="ident">Ordering::Less</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::ClockWise</span>,
-      <span class="ident">Ordering::Equal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CoLinear</span>,
-      <span class="ident">Ordering::Greater</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CounterClockWise</span>,
+    <span class="kw">match</span> <span class="ident">T::cmp_perp_vector_slope</span>(<span class="kw-2">&amp;</span><span class="ident">vector</span>.<span class="number">0</span>, <span class="ident">p1</span>, <span class="ident">p2</span>) {
+      <span class="ident">Ordering::Less</span> =&gt; <span class="ident">Orientation::ClockWise</span>,
+      <span class="ident">Ordering::Equal</span> =&gt; <span class="ident">Orientation::CoLinear</span>,
+      <span class="ident">Ordering::Greater</span> =&gt; <span class="ident">Orientation::CounterClockWise</span>,
     }
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_colinear</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_colinear</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
     <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">Orientation::CoLinear</span>)
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ccw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ccw</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
     <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">Orientation::CounterClockWise</span>)
   }
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_cw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_cw</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
     <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">Orientation::ClockWise</span>)
+  }
+
+  <span class="attribute">#[<span class="ident">must_use</span>]</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">then</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Orientation</span>) -&gt; <span class="ident">Orientation</span> {
+    <span class="kw">match</span> <span class="self">self</span> {
+      <span class="ident">Orientation::CoLinear</span> =&gt; <span class="ident">other</span>,
+      <span class="kw">_</span> =&gt; <span class="self">self</span>,
+    }
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">break_ties</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">b</span>: <span class="ident">u32</span>, <span class="ident">c</span>: <span class="ident">u32</span>) -&gt; <span class="ident">SoS</span> {
+    <span class="kw">match</span> <span class="self">self</span> {
+      <span class="ident">CounterClockWise</span> =&gt; <span class="ident">SoS::CounterClockWise</span>,
+      <span class="ident">ClockWise</span> =&gt; <span class="ident">SoS::ClockWise</span>,
+      <span class="ident">CoLinear</span> =&gt; <span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>),
+    }
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sos</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SoS</span>) -&gt; <span class="ident">SoS</span> {
+    <span class="kw">match</span> <span class="self">self</span> {
+      <span class="ident">CounterClockWise</span> =&gt; <span class="ident">SoS::CounterClockWise</span>,
+      <span class="ident">ClockWise</span> =&gt; <span class="ident">SoS::ClockWise</span>,
+      <span class="ident">CoLinear</span> =&gt; <span class="ident">other</span>,
+    }
   }
 
   <span class="comment">// pub fn around_origin&lt;T&gt;(q: &amp;[T; 2], r: &amp;[T; 2]) -&gt; Orientation</span>
@@ -549,11 +716,12 @@
   <span class="comment">//   raw_arr_turn_origin(q, r)</span>
   <span class="comment">// }</span>
 
-  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reverse</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Orientation</span> {
+  <span class="attribute">#[<span class="ident">must_use</span>]</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reverse</span>(<span class="self">self</span>) -&gt; <span class="ident">Orientation</span> {
     <span class="kw">match</span> <span class="self">self</span> {
-      <span class="ident">Orientation::CounterClockWise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::ClockWise</span>,
-      <span class="ident">Orientation::ClockWise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CounterClockWise</span>,
-      <span class="ident">Orientation::CoLinear</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Orientation::CoLinear</span>,
+      <span class="ident">Orientation::CounterClockWise</span> =&gt; <span class="ident">Orientation::ClockWise</span>,
+      <span class="ident">Orientation::ClockWise</span> =&gt; <span class="ident">Orientation::CounterClockWise</span>,
+      <span class="ident">Orientation::CoLinear</span> =&gt; <span class="ident">Orientation::CoLinear</span>,
     }
   }
 
@@ -562,9 +730,9 @@
     <span class="ident">p1</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>],
     <span class="ident">p2</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>],
     <span class="ident">p3</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>],
-  ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span>
+  ) -&gt; <span class="ident">Ordering</span>
   <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">num_traits::NumOps</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Extended</span> <span class="op">+</span> <span class="ident">Signed</span>,
+    <span class="ident">T</span>: <span class="ident">PolygonScalar</span>,
   {
     <span class="kw">let</span> <span class="ident">aq</span> <span class="op">=</span> <span class="ident">Orientation::along_vector</span>(<span class="ident">p1</span>, <span class="ident">vector</span>, <span class="ident">p2</span>);
     <span class="kw">let</span> <span class="ident">ar</span> <span class="op">=</span> <span class="ident">Orientation::along_vector</span>(<span class="ident">p1</span>, <span class="ident">vector</span>, <span class="ident">p3</span>);
@@ -575,54 +743,54 @@
     <span class="comment">//     || (d[1] &gt; p[1] &amp;&amp; z[1].is_negative()))</span>
     <span class="comment">// };</span>
     <span class="kw">let</span> <span class="ident">on_zero</span> <span class="op">=</span> <span class="op">|</span><span class="ident">d</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="number">2</span>]<span class="op">|</span> <span class="kw">match</span> <span class="ident">Orientation::along_perp_vector</span>(<span class="ident">p1</span>, <span class="ident">vector</span>, <span class="ident">d</span>) {
-      <span class="ident">CounterClockWise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-      <span class="ident">ClockWise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-      <span class="ident">CoLinear</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+      <span class="ident">CounterClockWise</span> =&gt; <span class="bool-val">false</span>,
+      <span class="ident">ClockWise</span> =&gt; <span class="bool-val">true</span>,
+      <span class="ident">CoLinear</span> =&gt; <span class="bool-val">true</span>,
     };
     <span class="kw">let</span> <span class="ident">cmp</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">Orientation::new</span>(<span class="ident">p1</span>, <span class="ident">p2</span>, <span class="ident">p3</span>) {
-      <span class="ident">CounterClockWise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Less</span>,
-      <span class="ident">ClockWise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Greater</span>,
-      <span class="ident">CoLinear</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Equal</span>,
+      <span class="ident">CounterClockWise</span> =&gt; <span class="ident">Ordering::Less</span>,
+      <span class="ident">ClockWise</span> =&gt; <span class="ident">Ordering::Greater</span>,
+      <span class="ident">CoLinear</span> =&gt; <span class="ident">Ordering::Equal</span>,
     };
     <span class="kw">match</span> (<span class="ident">aq</span>, <span class="ident">ar</span>) {
       <span class="comment">// Easy cases: Q and R are on either side of the line p-&gt;z:</span>
-      (<span class="ident">CounterClockWise</span>, <span class="ident">ClockWise</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Less</span>,
-      (<span class="ident">ClockWise</span>, <span class="ident">CounterClockWise</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Greater</span>,
+      (<span class="ident">CounterClockWise</span>, <span class="ident">ClockWise</span>) =&gt; <span class="ident">Ordering::Less</span>,
+      (<span class="ident">ClockWise</span>, <span class="ident">CounterClockWise</span>) =&gt; <span class="ident">Ordering::Greater</span>,
       <span class="comment">// A CoLinear point may be in front of p-&gt;z (0 degree angle) or behind</span>
       <span class="comment">// it (180 degree angle). If the other point is clockwise, it must have an</span>
       <span class="comment">// angle greater than 180 degrees and must therefore be greater than the</span>
       <span class="comment">// colinear point.</span>
-      (<span class="ident">CoLinear</span>, <span class="ident">ClockWise</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Less</span>,
-      (<span class="ident">ClockWise</span>, <span class="ident">CoLinear</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Greater</span>,
+      (<span class="ident">CoLinear</span>, <span class="ident">ClockWise</span>) =&gt; <span class="ident">Ordering::Less</span>,
+      (<span class="ident">ClockWise</span>, <span class="ident">CoLinear</span>) =&gt; <span class="ident">Ordering::Greater</span>,
 
       <span class="comment">// if Q and R are on the same side of P-&gt;Z then the most clockwise point</span>
       <span class="comment">// will have the smallest angle.</span>
-      (<span class="ident">CounterClockWise</span>, <span class="ident">CounterClockWise</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cmp</span>(),
-      (<span class="ident">ClockWise</span>, <span class="ident">ClockWise</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cmp</span>(),
+      (<span class="ident">CounterClockWise</span>, <span class="ident">CounterClockWise</span>) =&gt; <span class="ident">cmp</span>(),
+      (<span class="ident">ClockWise</span>, <span class="ident">ClockWise</span>) =&gt; <span class="ident">cmp</span>(),
 
       <span class="comment">// CoLinear points have an angle of either 0 degrees or 180 degrees. on_zero</span>
       <span class="comment">// can distinguish these two cases:</span>
       <span class="comment">//    on_zero(p) =&gt; 0 degrees.</span>
       <span class="comment">//   !on_zero(p) =&gt; 180 degrees.</span>
-      (<span class="ident">CounterClockWise</span>, <span class="ident">CoLinear</span>) <span class="op">=</span><span class="op">&gt;</span> {
+      (<span class="ident">CounterClockWise</span>, <span class="ident">CoLinear</span>) =&gt; {
         <span class="kw">if</span> <span class="ident">on_zero</span>(<span class="ident">p3</span>) {
           <span class="ident">Ordering::Greater</span> <span class="comment">// angle(r) = 0 &amp; 0 &lt; angle(q) &lt; 180. Thus: Q &gt; R</span>
         } <span class="kw">else</span> {
           <span class="ident">Ordering::Less</span> <span class="comment">// angle(r) = 180 &amp; 0 &lt; angle(q) &lt; 180. Thus: Q &lt; R</span>
         }
       }
-      (<span class="ident">CoLinear</span>, <span class="ident">CounterClockWise</span>) <span class="op">=</span><span class="op">&gt;</span> {
+      (<span class="ident">CoLinear</span>, <span class="ident">CounterClockWise</span>) =&gt; {
         <span class="kw">if</span> <span class="ident">on_zero</span>(<span class="ident">p2</span>) {
           <span class="ident">Ordering::Less</span>
         } <span class="kw">else</span> {
           <span class="ident">Ordering::Greater</span>
         }
       }
-      (<span class="ident">CoLinear</span>, <span class="ident">CoLinear</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> (<span class="ident">on_zero</span>(<span class="ident">p2</span>), <span class="ident">on_zero</span>(<span class="ident">p3</span>)) {
-        (<span class="bool-val">true</span>, <span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Equal</span>,
-        (<span class="bool-val">false</span>, <span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Equal</span>,
-        (<span class="bool-val">true</span>, <span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Less</span>,
-        (<span class="bool-val">false</span>, <span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ordering::Greater</span>,
+      (<span class="ident">CoLinear</span>, <span class="ident">CoLinear</span>) =&gt; <span class="kw">match</span> (<span class="ident">on_zero</span>(<span class="ident">p2</span>), <span class="ident">on_zero</span>(<span class="ident">p3</span>)) {
+        (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="ident">Ordering::Equal</span>,
+        (<span class="bool-val">false</span>, <span class="bool-val">false</span>) =&gt; <span class="ident">Ordering::Equal</span>,
+        (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="ident">Ordering::Less</span>,
+        (<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="ident">Ordering::Greater</span>,
       },
     }
   }
@@ -813,13 +981,77 @@
 <span class="comment">//   }</span>
 <span class="comment">// }</span>
 
+<span class="comment">// https://arxiv.org/abs/math/9410209</span>
+<span class="comment">// Simulation of Simplicity.</span>
+<span class="comment">// Break ties (ie colinear orientations) in an arbitrary but consistent way.</span>
+<span class="kw">impl</span> <span class="ident">SoS</span> {
+  <span class="comment">// p: Point::new([a, 2^a])</span>
+  <span class="comment">// q: Point::new([b, 2^b])</span>
+  <span class="comment">// r: Point::new([c, 2^c])</span>
+  <span class="comment">// new(a,b,c) == Orientation::new(p, q, r)</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">b</span>: <span class="ident">u32</span>, <span class="ident">c</span>: <span class="ident">u32</span>) -&gt; <span class="ident">SoS</span> {
+    <span class="macro">assert_ne!</span>(<span class="ident">a</span>, <span class="ident">b</span>);
+    <span class="macro">assert_ne!</span>(<span class="ident">b</span>, <span class="ident">c</span>);
+    <span class="macro">assert_ne!</span>(<span class="ident">c</span>, <span class="ident">a</span>);
+
+    <span class="comment">// Combinations:</span>
+    <span class="comment">//               a&lt;b a&lt;c c&lt;b</span>
+    <span class="comment">// b a c =&gt; CW    _   X   _</span>
+    <span class="comment">// c b a =&gt; CW    _   _   X</span>
+    <span class="comment">// a c b =&gt; CW    X   X   X</span>
+    <span class="comment">// b c a =&gt; CCW   _   _   _</span>
+    <span class="comment">// c a b =&gt; CCW   X   _   X</span>
+    <span class="comment">// a b c =&gt; CCW   X   X   _</span>
+
+    <span class="kw">let</span> <span class="ident">ab</span> <span class="op">=</span> <span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">b</span>;
+    <span class="kw">let</span> <span class="ident">ac</span> <span class="op">=</span> <span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">c</span>;
+    <span class="kw">let</span> <span class="ident">cb</span> <span class="op">=</span> <span class="ident">c</span> <span class="op">&lt;</span> <span class="ident">b</span>;
+    <span class="kw">if</span> <span class="ident">ab</span> <span class="op">^</span> <span class="ident">ac</span> <span class="op">^</span> <span class="ident">cb</span> {
+      <span class="ident">SoS::ClockWise</span>
+    } <span class="kw">else</span> {
+      <span class="ident">SoS::CounterClockWise</span>
+    }
+    <span class="comment">// if a &lt; b {</span>
+    <span class="comment">//   if a &lt; c &amp;&amp; c &lt; b {</span>
+    <span class="comment">//     SoS::ClockWise // a c b</span>
+    <span class="comment">//   } else {</span>
+    <span class="comment">//     SoS::CounterClockWise // a b c, c a b</span>
+    <span class="comment">//   }</span>
+    <span class="comment">// } else if b &lt; c &amp;&amp; c &lt; a {</span>
+    <span class="comment">//   SoS::CounterClockWise // b c a</span>
+    <span class="comment">// } else {</span>
+    <span class="comment">//   SoS::ClockWise // b a c, c b a</span>
+    <span class="comment">// }</span>
+  }
+
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">orient</span>(<span class="self">self</span>) -&gt; <span class="ident">Orientation</span> {
+    <span class="kw">match</span> <span class="self">self</span> {
+      <span class="ident">SoS::CounterClockWise</span> =&gt; <span class="ident">Orientation::CounterClockWise</span>,
+      <span class="ident">SoS::ClockWise</span> =&gt; <span class="ident">Orientation::ClockWise</span>,
+    }
+  }
+
+  <span class="attribute">#[<span class="ident">must_use</span>]</span>
+  <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reverse</span>(<span class="self">self</span>) -&gt; <span class="ident">SoS</span> {
+    <span class="kw">match</span> <span class="self">self</span> {
+      <span class="ident">SoS::CounterClockWise</span> =&gt; <span class="ident">SoS::ClockWise</span>,
+      <span class="ident">SoS::ClockWise</span> =&gt; <span class="ident">SoS::CounterClockWise</span>,
+    }
+  }
+}
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
   <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
+  <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data::Point</span>;
+  <span class="kw">use</span> <span class="ident">num::BigInt</span>;
+  <span class="kw">use</span> <span class="ident">proptest::prelude</span>::<span class="kw-2">*</span>;
+  <span class="kw">use</span> <span class="ident">test_strategy::proptest</span>;
+
   <span class="attribute">#[<span class="ident">test</span>]</span>
   <span class="kw">fn</span> <span class="ident">orientation_limit_1</span>() {
-    <span class="ident">Extended::cmp_slope</span>(
+    <span class="ident">PolygonScalar::cmp_slope</span>(
       <span class="kw-2">&amp;</span>[<span class="ident">i8::MAX</span>, <span class="ident">i8::MAX</span>],
       <span class="kw-2">&amp;</span>[<span class="ident">i8::MIN</span>, <span class="ident">i8::MIN</span>],
       <span class="kw-2">&amp;</span>[<span class="ident">i8::MIN</span>, <span class="ident">i8::MIN</span>],
@@ -829,7 +1061,7 @@
   <span class="attribute">#[<span class="ident">test</span>]</span>
   <span class="kw">fn</span> <span class="ident">cmp_slope_1</span>() {
     <span class="macro">assert_eq!</span>(
-      <span class="ident">Extended::cmp_slope</span>(<span class="kw-2">&amp;</span>[<span class="number">0i8</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">2</span>],),
+      <span class="ident">PolygonScalar::cmp_slope</span>(<span class="kw-2">&amp;</span>[<span class="number">0i8</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">2</span>],),
       <span class="ident">Ordering::Equal</span>
     );
   }
@@ -845,8 +1077,8 @@
   <span class="attribute">#[<span class="ident">test</span>]</span>
   <span class="kw">fn</span> <span class="ident">orientation_limit_2</span>() {
     <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="ident">i8::MIN</span>, <span class="ident">i8::MAX</span>, <span class="number">0</span>, <span class="op">-</span><span class="number">10</span>, <span class="number">10</span>];
-    <span class="kw">for</span> [<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>, <span class="ident">d</span>, <span class="ident">e</span>, <span class="ident">f</span>] <span class="kw">in</span> <span class="kw">crate</span><span class="ident">::utils::permutations</span>([<span class="ident">options</span>; <span class="number">6</span>]) {
-      <span class="ident">Extended::cmp_slope</span>(<span class="kw-2">&amp;</span>[<span class="ident">a</span>, <span class="ident">b</span>], <span class="kw-2">&amp;</span>[<span class="ident">c</span>, <span class="ident">d</span>], <span class="kw-2">&amp;</span>[<span class="ident">e</span>, <span class="ident">f</span>]);
+    <span class="kw">for</span> [<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>, <span class="ident">d</span>, <span class="ident">e</span>, <span class="ident">f</span>] <span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::utils::permutations</span>([<span class="ident">options</span>; <span class="number">6</span>]) {
+      <span class="ident">PolygonScalar::cmp_slope</span>(<span class="kw-2">&amp;</span>[<span class="ident">a</span>, <span class="ident">b</span>], <span class="kw-2">&amp;</span>[<span class="ident">c</span>, <span class="ident">d</span>], <span class="kw-2">&amp;</span>[<span class="ident">e</span>, <span class="ident">f</span>]);
     }
   }
 
@@ -863,7 +1095,48 @@
       <span class="ident">Ordering::Greater</span>
     );
   }
+
+  <span class="attribute">#[<span class="ident">test</span>]</span>
+  <span class="kw">fn</span> <span class="ident">sos_unit1</span>() {
+    <span class="macro">assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>), <span class="ident">SoS::CounterClockWise</span>)
+  }
+
+  <span class="attribute">#[<span class="ident">test</span>]</span>
+  <span class="attribute">#[<span class="ident">should_panic</span>]</span>
+  <span class="kw">fn</span> <span class="ident">sos_unit2</span>() {
+    <span class="ident">SoS::new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>);
+  }
+
+  <span class="attribute">#[<span class="ident">test</span>]</span>
+  <span class="kw">fn</span> <span class="ident">sos_unit3</span>() {
+    <span class="macro">assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="number">99</span>, <span class="number">0</span>, <span class="number">1</span>), <span class="ident">SoS::CounterClockWise</span>);
+  }
+
+  <span class="attribute">#[<span class="ident">proptest</span>]</span>
+  <span class="kw">fn</span> <span class="ident">sos_eq_prop</span>(<span class="ident">a</span>: <span class="ident">u8</span>, <span class="ident">b</span>: <span class="ident">u8</span>, <span class="ident">c</span>: <span class="ident">u8</span>) {
+    <span class="kw">if</span> <span class="ident">a</span> <span class="op">!</span><span class="op">=</span> <span class="ident">b</span> <span class="op">&amp;&amp;</span> <span class="ident">b</span> <span class="op">!</span><span class="op">=</span> <span class="ident">c</span> <span class="op">&amp;&amp;</span> <span class="ident">c</span> <span class="op">!</span><span class="op">=</span> <span class="ident">a</span> {
+      <span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>) <span class="op">=</span> (<span class="ident">a</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">b</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>);
+      <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">BigInt::from</span>(<span class="number">1</span>);
+      <span class="kw">let</span> <span class="ident">big_a</span> <span class="op">=</span> <span class="ident">BigInt::from</span>(<span class="ident">a</span>);
+      <span class="kw">let</span> <span class="ident">big_b</span> <span class="op">=</span> <span class="ident">BigInt::from</span>(<span class="ident">b</span>);
+      <span class="kw">let</span> <span class="ident">big_c</span> <span class="op">=</span> <span class="ident">BigInt::from</span>(<span class="ident">c</span>);
+      <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">Point::new</span>([<span class="ident">big_a</span>, <span class="ident">one</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">a</span>]);
+      <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">Point::new</span>([<span class="ident">big_b</span>, <span class="ident">one</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">b</span>]);
+      <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">Point::new</span>([<span class="ident">big_c</span>, <span class="ident">one</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">c</span>]);
+      <span class="macro">prop_assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>).<span class="ident">orient</span>(), <span class="ident">Orientation::new</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>, <span class="kw-2">&amp;</span><span class="ident">q</span>, <span class="kw-2">&amp;</span><span class="ident">r</span>));
+    }
+  }
+
+  <span class="attribute">#[<span class="ident">proptest</span>]</span>
+  <span class="kw">fn</span> <span class="ident">sos_rev_prop</span>(<span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">b</span>: <span class="ident">u32</span>, <span class="ident">c</span>: <span class="ident">u32</span>) {
+    <span class="kw">if</span> <span class="ident">a</span> <span class="op">!</span><span class="op">=</span> <span class="ident">b</span> <span class="op">&amp;&amp;</span> <span class="ident">b</span> <span class="op">!</span><span class="op">=</span> <span class="ident">c</span> <span class="op">&amp;&amp;</span> <span class="ident">c</span> <span class="op">!</span><span class="op">=</span> <span class="ident">a</span> {
+      <span class="macro">prop_assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>), <span class="ident">SoS::new</span>(<span class="ident">c</span>, <span class="ident">b</span>, <span class="ident">a</span>).<span class="ident">reverse</span>());
+      <span class="macro">prop_assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>), <span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">c</span>, <span class="ident">b</span>).<span class="ident">reverse</span>());
+      <span class="macro">prop_assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>), <span class="ident">SoS::new</span>(<span class="ident">b</span>, <span class="ident">a</span>, <span class="ident">c</span>).<span class="ident">reverse</span>());
+      <span class="macro">prop_assert_eq!</span>(<span class="ident">SoS::new</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>), <span class="ident">SoS::new</span>(<span class="ident">b</span>, <span class="ident">c</span>, <span class="ident">a</span>));
+    }
+  }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rgeometry" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rgeometry" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</body></html>
