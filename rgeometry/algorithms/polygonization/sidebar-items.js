@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["resolve_self_intersections",""],["two_opt_moves","Generate a valid polygon by connecting a set of points in such a way that there are no self-intersections."]]});
+window.SIDEBAR_ITEMS = {"fn":["new_monotone_polygon","new_star_polygon","resolve_self_intersections","two_opt_moves"]};

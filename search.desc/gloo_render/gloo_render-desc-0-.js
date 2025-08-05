@@ -1,0 +1,1 @@
+searchState.loadedDescShard("gloo_render", 0, "Crate that provides wrapper for requestAnimationFrame\nHandle for <code>request_animation_frame</code>.\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.\nCalls browser’s <code>requestAnimationFrame</code>. It is cancelled …")

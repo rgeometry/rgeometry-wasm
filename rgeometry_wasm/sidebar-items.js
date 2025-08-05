@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["playground",""]]});
+window.SIDEBAR_ITEMS = {"mod":["playground"]};

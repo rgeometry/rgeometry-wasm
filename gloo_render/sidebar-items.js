@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["request_animation_frame","Calls browser’s `requestAnimationFrame`. It is cancelled when the handler is dropped."]],"struct":[["AnimationFrame","Handle for [`request_animation_frame`]."]]});
+window.SIDEBAR_ITEMS = {"fn":["request_animation_frame"],"struct":["AnimationFrame"]};
