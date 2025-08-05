@@ -26,7 +26,7 @@ fn set_mouse(x: i32, y: i32) {
 }
 
 pub mod playground {
-  use rgeometry::algorithms::polygonization::*;
+  use rgeometry::algorithms::polygonization::{resolve_self_intersections, two_opt_moves};
   use rgeometry::data::*;
 
   use gloo_events::{EventListener, EventListenerOptions};
